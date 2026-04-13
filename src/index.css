@@ -1,0 +1,258 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    font-family: var(--font-sans);
+  }
+
+  body {
+    @apply bg-ink-50 text-ink-900 font-sans;
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  :root {
+    --font-sans: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  html[lang="ar"] {
+    --font-sans: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  html[dir="rtl"] body {
+    direction: rtl;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/60 backdrop-blur-xl border border-white/30 shadow-glass;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300
+           hover:text-white hover:bg-sidebar-hover transition-all duration-200
+           text-sm font-medium cursor-pointer select-none relative border-l-2 border-transparent;
+  }
+
+  .sidebar-link.active {
+    @apply text-white bg-sidebar-active shadow-lg shadow-black/20;
+  }
+
+  .sidebar-group-label {
+    @apply px-3 text-[10px] uppercase tracking-[0.2em] text-slate-500/80 font-semibold;
+  }
+
+  html[dir="ltr"] .sidebar-link.active {
+    border-left-color: #f97316;
+  }
+
+  html[dir="rtl"] .sidebar-link.active {
+    border-right-color: #f97316;
+  }
+
+  html[dir="rtl"] .sidebar-link {
+    border-left: 0;
+    border-right: 2px solid transparent;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl 
+           font-semibold text-sm transition-all duration-200 disabled:opacity-50 
+           disabled:cursor-not-allowed focus:outline-none focus:ring-2 
+           focus:ring-offset-2 select-none;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-600 text-white hover:bg-brand-700 
+           focus:ring-brand-500 active:scale-[0.98] shadow-sm;
+  }
+
+  .btn-secondary {
+    @apply btn bg-white text-slate-700 border border-slate-200 
+           hover:bg-slate-50 focus:ring-slate-300 active:scale-[0.98];
+  }
+
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700 
+           focus:ring-red-500 active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply btn text-slate-600 hover:bg-slate-100 focus:ring-slate-300;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs rounded-md;
+  }
+
+  .btn-xs {
+    @apply px-2.5 py-1 text-[10px] rounded-md;
+  }
+
+  .btn-icon {
+    @apply p-2 rounded-lg;
+  }
+
+  .input {
+    @apply w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white 
+           text-slate-900 text-sm placeholder:text-slate-400 
+           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 
+           transition-all duration-200 disabled:opacity-50 disabled:bg-slate-50;
+  }
+
+  .input-base {
+    @apply input;
+  }
+
+  .input-error {
+    @apply border-red-400 focus:ring-red-400 focus:border-red-400;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-slate-700 mb-1.5;
+  }
+
+  .error-msg {
+    @apply mt-1.5 text-xs text-red-600 flex items-center gap-1;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200 shadow-card;
+  }
+
+  .card-hover {
+    @apply hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-green {
+    @apply badge bg-emerald-50 text-emerald-700 border border-emerald-200;
+  }
+
+  .badge-red {
+    @apply badge bg-red-50 text-red-700 border border-red-200;
+  }
+
+  .badge-yellow {
+    @apply badge bg-amber-50 text-amber-700 border border-amber-200;
+  }
+
+  .badge-blue {
+    @apply badge bg-blue-50 text-blue-700 border border-blue-200;
+  }
+
+  .badge-gray {
+    @apply badge bg-slate-100 text-slate-600 border border-slate-200;
+  }
+
+  .table-th {
+    @apply px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider;
+  }
+
+  .table-td {
+    @apply px-4 py-3.5 text-sm text-slate-700;
+  }
+
+  .table-row {
+    @apply border-b border-slate-100 hover:bg-slate-50/70 transition-colors duration-150;
+  }
+
+  .stat-card {
+    @apply card p-5 flex items-start justify-between gap-4;
+  }
+
+  .page-header {
+    @apply mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold text-slate-900;
+  }
+
+  .page-subtitle {
+    @apply text-sm text-slate-500 mt-0.5;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-700 to-brand-400 bg-clip-text text-transparent;
+  }
+
+  .glass-surface {
+    @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-soft;
+  }
+
+  .skeleton {
+    @apply bg-slate-200 rounded animate-pulse;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .sidebar-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+    scrollbar-gutter: stable;
+  }
+
+  .sidebar-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .sidebar-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.3);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .sidebar-scrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.55);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
