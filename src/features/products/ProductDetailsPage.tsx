@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Package, Tag, DollarSign, BarChart2, Calendar, Pencil, Trash2, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { ArrowLeft, Package, Tag, Calendar, Pencil, Trash2, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { PublishedBadge } from '@/components/ui/Badge';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { AccessDeniedState } from '@/components/AccessDeniedState';
@@ -11,7 +11,7 @@ import { VariantsList } from './VariantsList';
 export function ProductDetailsPage() {
     const { id } = useParams<{ id: string }>();
     const {
-        product, variants, allAttributes, categoryAttributes, isLoading, isError, error, attributesError,
+        product, variants, categoryAttributes, isLoading, isError, error, attributesError,
         confirmDelete, setConfirmDelete, deleteMutation, toggleMutation,
     } = useProductDetails(id);
 
@@ -90,7 +90,7 @@ export function ProductDetailsPage() {
 
                             {product.images.length > 1 && (
                                 <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-4 gap-2">
-                                    {product.images.map((img: any, idx: number) => (
+                                    {product.images.map((img, idx) => (
                                         <button
                                             key={idx}
                                             onClick={() => setSelectedImageIdx(idx)}
@@ -157,8 +157,12 @@ export function ProductDetailsPage() {
                                 <p className="text-xs text-slate-400 mb-1 flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> Created By</p>
                                 {product.createdBy && typeof product.createdBy === 'object' ? (
                                     <>
-                                        <div className="text-sm text-slate-800 font-medium truncate" title={(product.createdBy as any).name}>{(product.createdBy as any).name}</div>
-                                        <div className="text-xs text-slate-400 truncate" title={(product.createdBy as any).email}>{(product.createdBy as any).email}</div>
+                                        <div className="text-sm text-slate-800 font-medium truncate" title={typeof product.createdBy === 'object' && product.createdBy ? product.createdBy.name : undefined}>
+                                            {typeof product.createdBy === 'object' && product.createdBy ? product.createdBy.name : '—'}
+                                        </div>
+                                        <div className="text-xs text-slate-400 truncate" title={typeof product.createdBy === 'object' && product.createdBy ? product.createdBy.email : undefined}>
+                                            {typeof product.createdBy === 'object' && product.createdBy ? product.createdBy.email : '—'}
+                                        </div>
                                     </>
                                 ) : (
                                     <span className="text-sm text-slate-400">System</span>
@@ -167,7 +171,6 @@ export function ProductDetailsPage() {
                         </div>
                     </div>
 
-                    {/* Variants Management section added here */}
                     <div className="card p-6">
                         <VariantsList productId={id!} variants={variants} allAttributes={categoryAttributes} />
                     </div>

@@ -134,7 +134,6 @@ function BannerHero({ banners }: { banners: SectionBanner[] }) {
 function BannerSlider({ banners }: { banners: SectionBanner[] }) {
     const { locale } = useLocale();
     const [activeIndex, setActiveIndex] = useState(0);
-    const scrollContainerRef = useState<HTMLDivElement | null>(null)[1];
 
     useEffect(() => {
         const id = setInterval(() => {
@@ -283,7 +282,7 @@ function ProductMiniCard({ product }: { product: SectionProduct }) {
 function SectionRenderer({ section }: { section: Section }) {
     const { locale, t } = useLocale();
     const normalized = normalizeSection(section);
-    const data = normalized.data as any;
+    const data = normalized.data;
     const title = pickLocale(section.title, locale, 'Featured');
     const description = pickLocale(section.description, locale, '');
 

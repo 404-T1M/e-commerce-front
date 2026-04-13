@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, MapPin, Truck, CreditCard, ShoppingBag, Plus, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -10,7 +10,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useToast } from '@/components/Toast';
 import { useLocale } from '@/contexts/LocaleContext';
-import { cn, DEFAULT_CURRENCY, formatCurrency, getIntlLocale, pickLocale } from '@/utils';
+import { cn, DEFAULT_CURRENCY, formatCurrency, getApiErrorMessage, getIntlLocale, pickLocale } from '@/utils';
 
 function AddAddressForm({ onSave, onCancel }: { onSave: (a: Address) => void; onCancel: () => void }) {
     const { toast } = useToast();
@@ -52,10 +52,11 @@ function AddAddressForm({ onSave, onCancel }: { onSave: (a: Address) => void; on
         };
         try {
             setLoading(true);
-            const res = await addressesApi.create(body) as any;
-            onSave(res.address || res.newAddress || res.data);
-        } catch (err: any) {
-            toast(err?.response?.data?.message ?? copy.saveFailed, 'error');
+            const res = await addressesApi.create(body);
+            if (res.address) onSave(res.address);
+            else throw new Error(copy.saveFailed);
+        } catch (err: unknown) {
+            toast(getApiErrorMessage(err, copy.saveFailed), 'error');
         } finally {
             setLoading(false);
         }
@@ -166,7 +167,7 @@ export function CheckoutPage() {
         enabled: isAuthenticated,
     });
 
-    const addresses: Address[] = addressData?.address?.addresses || (addressData as any)?.addresses || [];
+    const addresses: Address[] = useMemo(() => addressData?.address?.addresses ?? [], [addressData]);
 
     useEffect(() => {
         if (addresses.length > 0 && !selectedAddressId) {
@@ -205,8 +206,8 @@ export function CheckoutPage() {
             clearLocalCart();
             toast(copy.orderPlaced, 'success');
             navigate(`/account/orders/${res.order._id || res.order.id}`);
-        } catch (err: any) {
-            toast(err?.response?.data?.message ?? copy.placeFailed, 'error');
+        } catch (err: unknown) {
+            toast(getApiErrorMessage(err, copy.placeFailed), 'error');
         } finally {
             setIsPlacing(false);
         }
@@ -377,7 +378,7 @@ export function CheckoutPage() {
                             ))}
                             <div className="border-t pt-2 mt-2">
                                 <div className="flex justify-between text-gray-600">
-                                    <span>{copy.shipping} ({pickLocale(selectedShipping?.name as any, locale, '')})</span>
+                                    <span>{copy.shipping} ({selectedShipping?.name ? pickLocale(selectedShipping.name, locale, '') : ''})</span>
                                     <span className="font-medium">{selectedShipping ? formatCurrency(selectedShipping.price ?? 0, currency, intlLocale) : '—'}</span>
                                 </div>
                                 <div className="flex justify-between font-bold text-base mt-2">

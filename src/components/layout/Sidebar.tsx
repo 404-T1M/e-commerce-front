@@ -37,6 +37,10 @@ export function Sidebar() {
     const copy = getAdminNavCopy(locale);
     const navigate = useNavigate();
 
+    type IconType = typeof LayoutDashboard;
+    type NavItem = { to: string; icon: IconType; label: string; end?: boolean };
+    type NavGroup = { id: string; label: string; items: NavItem[] };
+
     const handleLogout = useCallback(() => {
         logout();
         navigate('/admin/login', { replace: true });
@@ -44,7 +48,7 @@ export function Sidebar() {
 
     const toggle = useCallback(() => setCollapsed((c) => !c), []);
 
-    const navGroups = [
+    const navGroups: NavGroup[] = [
         {
             id: 'dashboard',
             label: copy.groupOverview,
@@ -107,7 +111,7 @@ export function Sidebar() {
                 { to: '/admin/admin-groups', icon: ShieldCheck, label: copy.adminGroups },
             ],
         },
-    ] as const;
+    ];
     const CollapseIcon = collapsed
         ? (isRTL ? PanelRightOpen : PanelLeftOpen)
         : (isRTL ? PanelRightClose : PanelLeftClose);

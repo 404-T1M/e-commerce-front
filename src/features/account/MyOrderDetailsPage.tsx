@@ -5,7 +5,7 @@ import { ordersApi } from '@/api/orders.api';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useToast } from '@/components/Toast';
 import { useLocale } from '@/contexts/LocaleContext';
-import { cn, DEFAULT_CURRENCY, formatCurrency, formatDate, getIntlLocale, pickLocale } from '@/utils';
+import { cn, DEFAULT_CURRENCY, formatCurrency, formatDate, getApiErrorMessage, getIntlLocale, pickLocale } from '@/utils';
 
 const STATUS_STYLES: Record<string, string> = {
     pending: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -101,7 +101,7 @@ export function MyOrderDetailsPage() {
             queryClient.invalidateQueries({ queryKey: ['myOrder', id] });
             queryClient.invalidateQueries({ queryKey: ['myOrders'] });
         },
-        onError: (err: any) => toast(err?.response?.data?.message ?? copy.cancelFailed, 'error'),
+        onError: (err: unknown) => toast(getApiErrorMessage(err, copy.cancelFailed), 'error'),
     });
 
     if (isLoading) {
@@ -200,7 +200,9 @@ export function MyOrderDetailsPage() {
                         <p className="font-semibold text-gray-900 text-sm">
                             {typeof order.shippingMethod?.name === 'string'
                                 ? order.shippingMethod.name
-                                : pickLocale(order.shippingMethod?.name as any, locale, copy.shipping)}
+                                : order.shippingMethod?.name
+                                    ? pickLocale(order.shippingMethod.name, locale, copy.shipping)
+                                    : copy.shipping}
                         </p>
                         <p className="text-xs text-gray-400">{order.pricing?.shipping != null ? formatCurrency(order.pricing.shipping, currency, intlLocale) : '—'}</p>
                     </div>
@@ -208,8 +210,10 @@ export function MyOrderDetailsPage() {
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5 mb-1.5"><CreditCard className="w-3.5 h-3.5" /> {copy.payment}</p>
                         <p className="font-semibold text-gray-900 text-sm">
                             {typeof order.paymentMethod?.name === 'string'
-                                ? order.paymentMethod?.name
-                                : pickLocale(order.paymentMethod?.name as any, locale, copy.payment)}
+                                ? order.paymentMethod.name
+                                : order.paymentMethod?.name
+                                    ? pickLocale(order.paymentMethod.name, locale, copy.payment)
+                                    : copy.payment}
                         </p>
                     </div>
                 </div>

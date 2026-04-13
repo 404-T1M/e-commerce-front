@@ -24,9 +24,9 @@ export function useUsers() {
 
     const [confirmDelete, setConfirmDelete] = useState<UserListItem | null>(null);
 
-    const setPage = (p: number) => {
+    const setPage = useCallback((p: number) => {
         setSearchParams(prev => { prev.set('page', p.toString()); return prev; }, { replace: true });
-    };
+    }, [setSearchParams]);
 
     const setSearch = (s: string) => {
         setSearchParams(prev => {

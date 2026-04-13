@@ -7,7 +7,7 @@ import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useToast } from '@/components/Toast';
 import { Pagination } from '@/components/DataTable';
 import { useLocale } from '@/contexts/LocaleContext';
-import { formatDateTime, getIntlLocale } from '@/utils';
+import { formatDateTime, getApiErrorMessage, getIntlLocale } from '@/utils';
 
 interface ProductReviewsProps {
     productId: string;
@@ -111,8 +111,8 @@ export function ProductReviews({ productId, productName }: ProductReviewsProps) 
             setIsEditing(false);
             setFormComment('');
         },
-        onError: (err: any) => {
-            toast(err?.response?.data?.message || copy.submitFailed, 'error');
+        onError: (err: unknown) => {
+            toast(getApiErrorMessage(err, copy.submitFailed), 'error');
         }
     });
 
@@ -122,8 +122,8 @@ export function ProductReviews({ productId, productName }: ProductReviewsProps) 
             toast(copy.deleted, 'success');
             queryClient.invalidateQueries({ queryKey: ['product-reviews', productId] });
         },
-        onError: (err: any) => {
-            toast(err?.response?.data?.message || copy.deleteFailed, 'error');
+        onError: (err: unknown) => {
+            toast(getApiErrorMessage(err, copy.deleteFailed), 'error');
         }
     });
 

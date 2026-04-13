@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { CreditCard, RefreshCw } from 'lucide-react';
-import { walletApi } from '@/api/wallet.api';
+import { walletApi, type WalletTransaction } from '@/api/wallet.api';
 import { DataTable, type ColumnDef } from '@/components/DataTable';
 import { useToast } from '@/components/Toast';
 import { AccessDeniedState } from '@/components/AccessDeniedState';
-import { formatCurrency, formatDateTime, isForbiddenError } from '@/utils';
+import { formatCurrency, formatDateTime, getApiErrorMessage, isForbiddenError } from '@/utils';
 
 export function AdminWalletPage() {
     const { toast } = useToast();
@@ -27,7 +27,7 @@ export function AdminWalletPage() {
         onSuccess: (res) => {
             toast(res.message, 'success');
         },
-        onError: (err: any) => toast(err?.response?.data?.message || 'Failed to credit wallet', 'error'),
+        onError: (err: unknown) => toast(getApiErrorMessage(err, 'Failed to credit wallet'), 'error'),
     });
 
     const { data, isLoading, refetch, error } = useQuery({
@@ -42,7 +42,7 @@ export function AdminWalletPage() {
 
     const transactions = data?.transactions ?? [];
 
-    const columns: ColumnDef<any>[] = [
+    const columns: ColumnDef<WalletTransaction>[] = [
         { key: 'id', header: 'ID', cell: (row) => <span className="text-xs text-slate-400">{row.id.slice(-6)}</span> },
         { key: 'type', header: 'Type', cell: (row) => <span className="text-sm font-medium">{row.type}</span> },
         { key: 'amount', header: 'Amount', cell: (row) => <span className="text-sm font-semibold">{formatCurrency(row.amount)}</span> },

@@ -1,17 +1,17 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, Pencil, Layers3 } from "lucide-react";
 import { sectionsApi } from "@/api/sections.api";
 import { bannersApi } from "@/api/banners.api";
 import { categoriesApi } from "@/api/categories.api";
 import { productsApi } from "@/api/products.api";
-import type { Section, SectionType } from "@/types";
+import type { Section, SectionType, SectionDataIds, SectionDataPopulated } from "@/types";
 import { DataTable, type ColumnDef } from "@/components/DataTable";
 import { Modal } from "@/components/Modal";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useToast } from "@/components/Toast";
 import { AccessDeniedState } from '@/components/AccessDeniedState';
-import { pickLocale, isForbiddenError } from "@/utils";
+import { getApiErrorMessage, pickLocale, isForbiddenError } from "@/utils";
 import { useLocale } from "@/contexts/LocaleContext";
 
 const SECTION_TYPES: SectionType[] = [
@@ -63,24 +63,25 @@ const emptyForm: SectionFormState = {
 };
 
 const getDataIds = (data: Section["data"] | undefined) => {
-  const source = (data ?? {}) as any;
+  const ids = data as SectionDataIds | undefined;
+  const populated = data as SectionDataPopulated | undefined;
 
-  const bannerIds: string[] = Array.isArray(source.bannerIds)
-    ? source.bannerIds
-    : Array.isArray(source.banners)
-      ? source.banners.map((b: any) => b?.id).filter(Boolean)
+  const bannerIds: string[] = Array.isArray(ids?.bannerIds)
+    ? ids?.bannerIds
+    : Array.isArray(populated?.banners)
+      ? populated?.banners.map((b) => b?.id).filter(Boolean)
       : [];
 
-  const categoryIds: string[] = Array.isArray(source.categoryIds)
-    ? source.categoryIds
-    : Array.isArray(source.categories)
-      ? source.categories.map((c: any) => c?.id).filter(Boolean)
+  const categoryIds: string[] = Array.isArray(ids?.categoryIds)
+    ? ids?.categoryIds
+    : Array.isArray(populated?.categories)
+      ? populated?.categories.map((c) => c?.id).filter(Boolean)
       : [];
 
-  const productIds: string[] = Array.isArray(source.productIds)
-    ? source.productIds
-    : Array.isArray(source.products)
-      ? source.products.map((p: any) => p?.id).filter(Boolean)
+  const productIds: string[] = Array.isArray(ids?.productIds)
+    ? ids?.productIds
+    : Array.isArray(populated?.products)
+      ? populated?.products.map((p) => p?.id).filter(Boolean)
       : [];
 
   return { bannerIds, categoryIds, productIds };
@@ -122,23 +123,10 @@ export function SectionsPage() {
     isForbiddenError(categoriesError) ||
     isForbiddenError(productsError);
 
-  if (forbidden) {
-    return <AccessDeniedState />;
-  }
-
-  const sections = useMemo(() => data?.sections ?? [], [data?.sections]);
-  const banners = useMemo(
-    () => bannersData?.banners ?? [],
-    [bannersData?.banners],
-  );
-  const categories = useMemo(
-    () => categoriesData?.categories ?? [],
-    [categoriesData?.categories],
-  );
-  const products = useMemo(
-    () => productsData?.products ?? [],
-    [productsData?.products],
-  );
+  const sections = data?.sections ?? [];
+  const banners = bannersData?.banners ?? [];
+  const categories = categoriesData?.categories ?? [];
+  const products = productsData?.products ?? [];
 
   const isBannerType =
     formState.type === "hero_banner" || formState.type === "slider";
@@ -210,31 +198,25 @@ export function SectionsPage() {
   };
 
   const createMutation = useMutation({
-    mutationFn: (body: any) => sectionsApi.create(body),
+    mutationFn: (body: Record<string, unknown>) => sectionsApi.create(body),
     onSuccess: () => {
       toast("Section created", "success");
       qc.invalidateQueries({ queryKey: ["admin-sections"] });
       setFormOpen(false);
     },
-    onError: (err: any) =>
-      toast(
-        err?.response?.data?.message || "Failed to create section",
-        "error",
-      ),
+    onError: (err: unknown) =>
+      toast(getApiErrorMessage(err, "Failed to create section"), "error"),
   });
 
   const updateMutation = useMutation({
-    mutationFn: (body: any) => sectionsApi.update(editing!.id, body),
+    mutationFn: (body: Record<string, unknown>) => sectionsApi.update(editing!.id, body),
     onSuccess: () => {
       toast("Section updated", "success");
       qc.invalidateQueries({ queryKey: ["admin-sections"] });
       setFormOpen(false);
     },
-    onError: (err: any) =>
-      toast(
-        err?.response?.data?.message || "Failed to update section",
-        "error",
-      ),
+    onError: (err: unknown) =>
+      toast(getApiErrorMessage(err, "Failed to update section"), "error"),
   });
 
   const deleteMutation = useMutation({
@@ -244,12 +226,13 @@ export function SectionsPage() {
       qc.invalidateQueries({ queryKey: ["admin-sections"] });
       setDeleteTarget(null);
     },
-    onError: (err: any) =>
-      toast(
-        err?.response?.data?.message || "Failed to delete section",
-        "error",
-      ),
+    onError: (err: unknown) =>
+      toast(getApiErrorMessage(err, "Failed to delete section"), "error"),
   });
+
+  if (forbidden) {
+    return <AccessDeniedState />;
+  }
 
   const submitForm = () => {
     // Validate required fields
@@ -278,7 +261,7 @@ export function SectionsPage() {
       return;
     }
 
-    let parsedData: any = {};
+    let parsedData: Record<string, unknown> = {};
 
     if (isBannerType) {
       if (isSingleBanner && formState.selectedBannerIds.length !== 1) {
@@ -306,9 +289,10 @@ export function SectionsPage() {
       parsedData = { productIds: formState.selectedProductIds };
     } else {
       try {
-        parsedData = formState.dataJson?.trim()
+        const parsed = formState.dataJson?.trim()
           ? JSON.parse(formState.dataJson)
           : {};
+        parsedData = (parsed && typeof parsed === "object") ? (parsed as Record<string, unknown>) : {};
       } catch {
         toast("Invalid JSON in data field", "error");
         return;

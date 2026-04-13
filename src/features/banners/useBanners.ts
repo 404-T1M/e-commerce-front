@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
-import { bannersApi, type Banner } from '@/api/banners.api';
+import { bannersApi } from '@/api/banners.api';
 import { useToast } from '@/components/Toast';
+import { getApiErrorMessage } from '@/utils';
 
 export function useBanners() {
     const { toast } = useToast();
@@ -41,7 +42,7 @@ export function useBanners() {
             toast(res.message, 'success');
             qc.invalidateQueries({ queryKey: ['admin-banners'] });
         },
-        onError: (err: any) => toast(err?.response?.data?.message || 'Failed to create', 'error'),
+        onError: (err: unknown) => toast(getApiErrorMessage(err, 'Failed to create'), 'error'),
     });
 
     const updateMutation = useMutation({
@@ -50,7 +51,7 @@ export function useBanners() {
             toast(res.message, 'success');
             qc.invalidateQueries({ queryKey: ['admin-banners'] });
         },
-        onError: (err: any) => toast(err?.response?.data?.message || 'Failed to update', 'error'),
+        onError: (err: unknown) => toast(getApiErrorMessage(err, 'Failed to update'), 'error'),
     });
 
     const deleteMutation = useMutation({
@@ -59,7 +60,7 @@ export function useBanners() {
             toast(res.message, 'success');
             qc.invalidateQueries({ queryKey: ['admin-banners'] });
         },
-        onError: (err: any) => toast(err?.response?.data?.message || 'Failed to delete', 'error'),
+        onError: (err: unknown) => toast(getApiErrorMessage(err, 'Failed to delete'), 'error'),
     });
 
     return {

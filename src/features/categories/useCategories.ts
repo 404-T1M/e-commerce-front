@@ -3,10 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { categoriesApi } from '@/api/categories.api';
 import { attributesApi } from '@/api/attributes.api';
 import { useToast } from '@/components/Toast';
-import type { CategoryFormValues, CategoryAttributeEntry } from './types'; // We'll extract types
-import type { CategoryData } from '@/types';
-
-type AE = { response?: { data?: { message?: string } } };
+import type { CategoryFormValues, CategoryAttributeEntry } from './types';
+import { getApiErrorMessage } from '@/utils';
 
 export function useCategories() {
     const toast = useToast();
@@ -93,14 +91,14 @@ export function useCategories() {
     const createMutation = useMutation({
         mutationFn: ({ data, attrs, imgRef }: { data: CategoryFormValues, attrs: CategoryAttributeEntry[], imgRef: React.RefObject<HTMLInputElement | null> }) => {
             const file = imgRef.current?.files?.[0];
-            if (!file) throw { response: { data: { message: 'Category image is required' } } };
+            if (!file) throw new Error('Category image is required');
             return categoriesApi.create(buildFormData(data, attrs, imgRef));
         },
         onSuccess: (res: { message?: string }) => {
             toast.success(res.message ?? 'Category created');
             qc.invalidateQueries({ queryKey: ['admin-categories'] });
         },
-        onError: (err: AE) => toast.error(err.response?.data?.message ?? 'Failed to create'),
+        onError: (err: unknown) => toast.error(getApiErrorMessage(err, 'Failed to create')),
     });
 
     const updateMutation = useMutation({
@@ -110,7 +108,7 @@ export function useCategories() {
             toast.success(res.message ?? 'Category updated');
             qc.invalidateQueries({ queryKey: ['admin-categories'] });
         },
-        onError: (err: AE) => toast.error(err.response?.data?.message ?? 'Failed to update'),
+        onError: (err: unknown) => toast.error(getApiErrorMessage(err, 'Failed to update')),
     });
 
     const deleteMutation = useMutation({
@@ -119,7 +117,7 @@ export function useCategories() {
             toast.success(res.message ?? 'Category deleted');
             qc.invalidateQueries({ queryKey: ['admin-categories'] });
         },
-        onError: (err: AE) => toast.error(err.response?.data?.message ?? 'Failed to delete'),
+        onError: (err: unknown) => toast.error(getApiErrorMessage(err, 'Failed to delete')),
     });
 
     const togglePublishMutation = useMutation({
@@ -129,7 +127,7 @@ export function useCategories() {
             toast.success(res.message ?? 'Status updated');
             qc.invalidateQueries({ queryKey: ['admin-categories'] });
         },
-        onError: (err: AE) => toast.error(err.response?.data?.message ?? 'Failed'),
+        onError: (err: unknown) => toast.error(getApiErrorMessage(err, 'Failed')),
     });
 
     return {

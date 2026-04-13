@@ -7,7 +7,7 @@ import { Modal } from '@/components/Modal';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useToast } from '@/components/Toast';
 import { AccessDeniedState } from '@/components/AccessDeniedState';
-import { formatDate, isForbiddenError } from '@/utils';
+import { formatDate, getApiErrorMessage, isForbiddenError } from '@/utils';
 import { paymentApi, type PaymentMethod } from '@/api/payment.api';
 
 function PaymentForm({
@@ -105,32 +105,32 @@ export function PaymentMethodsPage() {
         }),
     });
 
+    const invalidate = () => queryClient.invalidateQueries({ queryKey: ['adminPayment'] });
+
+    const createMutation = useMutation({
+        mutationFn: (fd: FormData) => paymentApi.adminCreate(fd),
+        onSuccess: () => { toast('Created successfully', 'success'); setCreateOpen(false); invalidate(); },
+        onError: (e: unknown) => toast(getApiErrorMessage(e, 'Error'), 'error'),
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: ({ id, fd }: { id: string; fd: FormData }) => paymentApi.adminUpdate(id, fd),
+        onSuccess: () => { toast('Updated successfully', 'success'); setEditTarget(null); invalidate(); },
+        onError: (e: unknown) => toast(getApiErrorMessage(e, 'Error'), 'error'),
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => paymentApi.adminDelete(id),
+        onSuccess: () => { toast('Deleted', 'success'); setDeleteTarget(null); invalidate(); },
+        onError: (e: unknown) => toast(getApiErrorMessage(e, 'Error'), 'error'),
+    });
+
     if (isForbiddenError(error)) {
         return <AccessDeniedState />;
     }
 
     const methods = data?.paymentMethods ?? [];
     const meta = data?.meta;
-
-    const invalidate = () => queryClient.invalidateQueries({ queryKey: ['adminPayment'] });
-
-    const createMutation = useMutation({
-        mutationFn: (fd: FormData) => paymentApi.adminCreate(fd),
-        onSuccess: () => { toast('Created successfully', 'success'); setCreateOpen(false); invalidate(); },
-        onError: (e: any) => toast(e?.response?.data?.message ?? 'Error', 'error'),
-    });
-
-    const updateMutation = useMutation({
-        mutationFn: ({ id, fd }: { id: string; fd: FormData }) => paymentApi.adminUpdate(id, fd),
-        onSuccess: () => { toast('Updated successfully', 'success'); setEditTarget(null); invalidate(); },
-        onError: (e: any) => toast(e?.response?.data?.message ?? 'Error', 'error'),
-    });
-
-    const deleteMutation = useMutation({
-        mutationFn: (id: string) => paymentApi.adminDelete(id),
-        onSuccess: () => { toast('Deleted', 'success'); setDeleteTarget(null); invalidate(); },
-        onError: (e: any) => toast(e?.response?.data?.message ?? 'Error', 'error'),
-    });
 
     const columns: ColumnDef<PaymentMethod>[] = [
         {

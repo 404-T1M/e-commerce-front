@@ -9,13 +9,26 @@ import {
   X,
   Image as ImageIcon,
 } from "lucide-react";
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import { useVariants } from "./useVariants";
 import { Modal } from "@/components/Modal";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { PublishedBadge } from "@/components/ui/Badge";
 import { DEFAULT_CURRENCY, formatCurrency, cn } from "@/utils";
 import type { ProductVariant, Attribute } from "@/types";
+import type { VariantsFormInput, VariantsFormValues } from "./types";
+
+type VariantFieldName = "sku" | "stock" | "originalPrice" | "salePrice";
+
+type VariantFieldItemProps = {
+  form: UseFormReturn<VariantsFormInput, unknown, VariantsFormValues>;
+  index: number;
+  allAttributes: Attribute[];
+  isEdit: boolean;
+  remove: () => void;
+  images: Record<number, File | null>;
+  setImages: React.Dispatch<React.SetStateAction<Record<number, File | null>>>;
+};
 
 function VariantFieldItemComponent({
   form,
@@ -25,7 +38,7 @@ function VariantFieldItemComponent({
   remove,
   images,
   setImages,
-}: any) {
+}: VariantFieldItemProps) {
   const {
     register,
     formState: { errors },
@@ -39,7 +52,7 @@ function VariantFieldItemComponent({
   const currentAttributes = watch(attributesPaths) || [];
 
   const field = (
-    name: string,
+    name: VariantFieldName,
     label: string,
     opts?: { type?: string; placeholder?: string },
   ) => {
@@ -61,7 +74,7 @@ function VariantFieldItemComponent({
 
   const addAttribute = () => {
     if (!newAttrId || !newAttrValue.trim()) return;
-    if (currentAttributes.some((a: any) => a.attributeId === newAttrId)) return;
+    if (currentAttributes.some((a) => a.attributeId === newAttrId)) return;
     setValue(attributesPaths, [
       ...currentAttributes,
       { attributeId: newAttrId, value: newAttrValue.trim() },
@@ -73,7 +86,7 @@ function VariantFieldItemComponent({
   const removeAttribute = (idToRemove: string) => {
     setValue(
       attributesPaths,
-      currentAttributes.filter((a: any) => a.attributeId !== idToRemove),
+      currentAttributes.filter((a) => a.attributeId !== idToRemove),
     );
   };
 
@@ -92,8 +105,12 @@ function VariantFieldItemComponent({
       <div className="grid grid-cols-2 gap-3 mb-4">
         {field("sku", "SKU (Optional)", { placeholder: "PROD-RED-L" })}
         {field("stock", "Stock", { type: "number" })}
-        {field("originalPrice", `Original Price (${DEFAULT_CURRENCY})`, { type: "number" })}
-        {field("salePrice", `Sale Price (${DEFAULT_CURRENCY})`, { type: "number" })}
+        {field("originalPrice", `Original Price (${DEFAULT_CURRENCY})`, {
+          type: "number",
+        })}
+        {field("salePrice", `Sale Price (${DEFAULT_CURRENCY})`, {
+          type: "number",
+        })}
       </div>
 
       <div className="card p-4 bg-slate-50 space-y-3 mb-4">
@@ -108,7 +125,7 @@ function VariantFieldItemComponent({
             className="input text-sm flex-1"
           >
             <option value="">— Select attribute —</option>
-            {allAttributes.map((a: any) => (
+            {allAttributes.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name.en} ({a.type})
               </option>
@@ -116,9 +133,7 @@ function VariantFieldItemComponent({
           </select>
 
           {(() => {
-            const selectedAttr = allAttributes.find(
-              (a: any) => a.id === newAttrId,
-            );
+            const selectedAttr = allAttributes.find((a) => a.id === newAttrId);
             if (!selectedAttr) {
               return (
                 <input
@@ -189,10 +204,8 @@ function VariantFieldItemComponent({
         </div>
         {currentAttributes.length > 0 && (
           <div className="flex flex-wrap gap-2 pt-2">
-            {currentAttributes.map((a: any) => {
-              const attr = allAttributes.find(
-                (x: any) => x.id === a.attributeId,
-              );
+            {currentAttributes.map((a) => {
+              const attr = allAttributes.find((x) => x.id === a.attributeId);
               return (
                 <span
                   key={a.attributeId}
@@ -219,7 +232,7 @@ function VariantFieldItemComponent({
           type="file"
           accept="image/*"
           onChange={(e) =>
-            setImages((prev: any) => ({
+            setImages((prev) => ({
               ...prev,
               [index]: e.target.files?.[0] || null,
             }))

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, Layers, Search, Loader2, ChevronDown } from 'lucide-react';
 import type { Attribute } from '@/types';
@@ -8,7 +8,7 @@ import { Modal } from '@/components/Modal';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { AccessDeniedState } from '@/components/AccessDeniedState';
 import { formatDate, cn, isForbiddenError } from '@/utils';
-import { useAttributes, LIMIT } from './useAttributes';
+import { useAttributes } from './useAttributes';
 import { attributeSchema, TYPES, type AttributeFormValues, type AttributeType } from './types';
 import { OptionsBuilder } from './OptionsBuilder';
 
@@ -21,7 +21,7 @@ const TYPE_COLORS: Record<AttributeType, string> = {
 
 export function AttributesPage() {
     const {
-        page, setPage,
+        setPage,
         search, setSearch,
         query, attributes, meta, isLoading, isError, refetch,
         createMutation, deleteMutation,
@@ -36,7 +36,7 @@ export function AttributesPage() {
         defaultValues: { type: 'text', options: [] },
     });
 
-    const watchType = form.watch('type');
+    const watchType = useWatch({ control: form.control, name: 'type' });
 
     const setOptions = useCallback((opts: string[]) => {
         setLocalOptions(opts);

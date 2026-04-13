@@ -24,6 +24,8 @@ export interface UserData {
     token: string;
 }
 
+export type UserProfile = Omit<UserData, 'token'>;
+
 export const userAuthApi = {
     /**
      * POST /auth/register
@@ -41,7 +43,7 @@ export const userAuthApi = {
      * GET /auth/me — returns current user profile from token
      */
     getMe: () =>
-        userApi.get<{ user: UserData }>('/auth/me').then((r) => r.data),
+        userApi.get<{ user: UserProfile }>('/auth/me').then((r) => r.data),
 
     /**
      * POST /auth/verify-email

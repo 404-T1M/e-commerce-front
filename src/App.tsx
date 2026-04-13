@@ -7,7 +7,6 @@ import {
 } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { UserAuthProvider } from '@/contexts/UserAuthContext';
 import { ToastProvider } from '@/components/Toast';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';

@@ -1,7 +1,9 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
     createContext,
     useContext,
     useEffect,
+    useCallback,
     useMemo,
     useState,
     type ReactNode,
@@ -125,15 +127,17 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
         i18n.changeLanguage(locale);
     }, [locale, direction]);
 
-    const setLocale = (next: Locale) => setLocaleState(next);
-    const toggleLocale = () => setLocaleState((l) => (l === 'ar' ? 'en' : 'ar'));
+    const setLocale = useCallback((next: Locale) => setLocaleState(next), []);
+    const toggleLocale = useCallback(() => setLocaleState((l) => (l === 'ar' ? 'en' : 'ar')), []);
 
-    const t = (key: TranslationKey, fallback?: string) =>
-        translations[locale][key] ?? fallback ?? key;
+    const t = useCallback(
+        (key: TranslationKey, fallback?: string) => translations[locale][key] ?? fallback ?? key,
+        [locale],
+    );
 
     const value = useMemo<LocaleContextValue>(
         () => ({ locale, direction, isRTL, setLocale, toggleLocale, t }),
-        [locale, direction, isRTL],
+        [locale, direction, isRTL, setLocale, toggleLocale, t],
     );
 
     return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

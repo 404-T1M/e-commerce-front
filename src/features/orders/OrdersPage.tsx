@@ -5,7 +5,7 @@ import { ShoppingBag, Search, RefreshCw, Eye, ChevronDown } from "lucide-react";
 import { DataTable, Pagination, type ColumnDef } from "@/components/DataTable";
 import { Modal } from "@/components/Modal";
 import { AccessDeniedState } from '@/components/AccessDeniedState';
-import { cn, DEFAULT_CURRENCY, formatCurrency, formatDate, getIntlLocale, pickLocale, isForbiddenError } from "@/utils";
+import { cn, DEFAULT_CURRENCY, formatCurrency, formatDate, getApiErrorMessage, getIntlLocale, pickLocale, isForbiddenError } from "@/utils";
 import { ordersApi, type Order, type OrderStatus } from "@/api/orders.api";
 import { useToast } from "@/components/Toast";
 import { useLocale } from "@/contexts/LocaleContext";
@@ -183,8 +183,8 @@ function OrderDetailsModal({
       queryClient.invalidateQueries({ queryKey: ["adminOrders"] });
       onClose();
     },
-    onError: (err: any) =>
-      toast(err?.response?.data?.message ?? copy.modal.statusFailed, "error"),
+    onError: (err: unknown) =>
+      toast(getApiErrorMessage(err, copy.modal.statusFailed), "error"),
   });
 
   const c = typeof order.customer === "object" ? order.customer : null;
@@ -196,11 +196,15 @@ function OrderDetailsModal({
   const shippingName =
     typeof order.shippingMethod?.name === "string"
       ? order.shippingMethod.name
-      : pickLocale(
-          order.shippingMethod?.name as any,
-          locale,
-          copy.modal.shippingFallback,
-        );
+      : order.shippingMethod?.name
+        ? pickLocale(order.shippingMethod.name, locale, copy.modal.shippingFallback)
+        : "";
+  const paymentName =
+    typeof order.paymentMethod?.name === "string"
+      ? order.paymentMethod.name
+      : order.paymentMethod?.name
+        ? pickLocale(order.paymentMethod.name, locale, copy.modal.emptyValue)
+        : copy.modal.emptyValue;
 
   return (
     <div className="space-y-6">
@@ -251,7 +255,7 @@ function OrderDetailsModal({
             {copy.modal.payment}
           </p>
           <p className="font-medium text-slate-800">
-            {order.paymentMethod?.name || copy.modal.emptyValue}
+            {paymentName}
           </p>
           <p className="text-sm text-slate-500 capitalize">
             {copy.modal.paymentStatus}:{" "}
@@ -395,7 +399,7 @@ export function OrdersPage() {
         status: statusFilter || undefined,
         paymentStatus: paymentStatusFilter || undefined,
         orderNumber: orderNumber || undefined,
-      } as any),
+      }),
   });
 
   const orders = data?.orders ?? [];
@@ -456,7 +460,11 @@ export function OrdersPage() {
             {getPaymentStatusLabel(row.paymentStatus, locale)}
           </span>
           <span className="text-xs text-slate-500 font-medium">
-            {row.paymentMethod?.name || "—"}
+            {typeof row.paymentMethod?.name === "string"
+              ? row.paymentMethod.name
+              : row.paymentMethod?.name
+                ? pickLocale(row.paymentMethod.name, locale, "—")
+                : "—"}
           </span>
         </div>
       ),

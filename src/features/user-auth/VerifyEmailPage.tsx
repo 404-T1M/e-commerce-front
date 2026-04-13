@@ -4,6 +4,7 @@ import { Mail, ArrowRight, RefreshCw } from 'lucide-react';
 import { userAuthApi } from '@/api/user-auth.api';
 import { useToast } from '@/components/Toast';
 import { useLocale } from '@/contexts/LocaleContext';
+import { getApiErrorMessage } from '@/utils';
 
 export function VerifyEmailPage() {
     const [searchParams] = useSearchParams();
@@ -11,6 +12,33 @@ export function VerifyEmailPage() {
     const { toast } = useToast();
     const { locale } = useLocale();
     const navigate = useNavigate();
+    const copy = locale === 'ar' ? {
+        title: 'تأكيد البريد الإلكتروني',
+        sentTo: 'أرسلنا رمزًا مكوّنًا من 6 أرقام إلى',
+        yourEmail: 'بريدك الإلكتروني',
+        verify: 'تأكيد البريد',
+        enterCode: 'يرجى إدخال رمز مكوّن من 6 أرقام',
+        verified: 'تم تأكيد البريد! يمكنك تسجيل الدخول الآن.',
+        invalid: 'رمز غير صالح. حاول مرة أخرى.',
+        didntReceive: 'لم تستلم رمزًا؟',
+        resend: 'إعادة الإرسال',
+        resendSuccess: 'تمت إعادة إرسال الرمز. تحقق من بريدك.',
+        resendFail: 'تعذر إعادة إرسال الرمز.',
+        back: 'العودة لتسجيل الدخول',
+    } : {
+        title: 'Verify your email',
+        sentTo: 'We sent a 6-digit code to',
+        yourEmail: 'your email',
+        verify: 'Verify Email',
+        enterCode: 'Please enter the 6-digit code',
+        verified: 'Email verified! You can now log in.',
+        invalid: 'Invalid code. Please try again.',
+        didntReceive: "Didn't receive a code?",
+        resend: 'Resend code',
+        resendSuccess: 'Verification code resent. Check your inbox.',
+        resendFail: 'Failed to resend code.',
+        back: 'Back to login',
+    };
     const [code, setCode] = useState(['', '', '', '', '', '']);
     const [isLoading, setIsLoading] = useState(false);
     const [isResending, setIsResending] = useState(false);
@@ -47,8 +75,8 @@ export function VerifyEmailPage() {
             await userAuthApi.verifyEmail({ email, code: fullCode });
             toast(copy.verified, 'success');
             navigate('/login');
-        } catch (err: any) {
-            toast(err?.response?.data?.message ?? copy.invalid, 'error');
+        } catch (err: unknown) {
+            toast(getApiErrorMessage(err, copy.invalid), 'error');
         } finally {
             setIsLoading(false);
         }
@@ -60,8 +88,8 @@ export function VerifyEmailPage() {
             setIsResending(true);
             await userAuthApi.resendCode({ email });
             toast(copy.resendSuccess, 'success');
-        } catch (err: any) {
-            toast(err?.response?.data?.message ?? copy.resendFail, 'error');
+        } catch (err: unknown) {
+            toast(getApiErrorMessage(err, copy.resendFail), 'error');
         } finally {
             setIsResending(false);
         }
@@ -132,30 +160,3 @@ export function VerifyEmailPage() {
         </div>
     );
 }
-    const copy = locale === 'ar' ? {
-        title: 'تأكيد البريد الإلكتروني',
-        sentTo: 'أرسلنا رمزًا مكوّنًا من 6 أرقام إلى',
-        yourEmail: 'بريدك الإلكتروني',
-        verify: 'تأكيد البريد',
-        enterCode: 'يرجى إدخال رمز مكوّن من 6 أرقام',
-        verified: 'تم تأكيد البريد! يمكنك تسجيل الدخول الآن.',
-        invalid: 'رمز غير صالح. حاول مرة أخرى.',
-        didntReceive: 'لم تستلم رمزًا؟',
-        resend: 'إعادة الإرسال',
-        resendSuccess: 'تمت إعادة إرسال الرمز. تحقق من بريدك.',
-        resendFail: 'تعذر إعادة إرسال الرمز.',
-        back: 'العودة لتسجيل الدخول',
-    } : {
-        title: 'Verify your email',
-        sentTo: 'We sent a 6-digit code to',
-        yourEmail: 'your email',
-        verify: 'Verify Email',
-        enterCode: 'Please enter the 6-digit code',
-        verified: 'Email verified! You can now log in.',
-        invalid: 'Invalid code. Please try again.',
-        didntReceive: "Didn't receive a code?",
-        resend: 'Resend code',
-        resendSuccess: 'Verification code resent. Check your inbox.',
-        resendFail: 'Failed to resend code.',
-        back: 'Back to login',
-    };

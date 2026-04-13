@@ -1,6 +1,6 @@
 import api from './axios';
 import { buildQuery } from '@/utils';
-import type { MessageResponse, MetaPagination } from '@/types';
+import type { MessageResponse, MetaPagination, AdminRef } from '@/types';
 
 export interface Banner {
     id: string;
@@ -13,8 +13,8 @@ export interface Banner {
     link?: string;
     order: number;
     isActive: boolean;
-    createdBy: any;
-    updatedBy: any;
+    createdBy: AdminRef;
+    updatedBy: AdminRef;
     createdAt: string;
     updatedAt: string;
 }
@@ -26,7 +26,7 @@ export interface BannersListResponse {
 
 export const bannersApi = {
     /** GET /admin/banners */
-    list: (params: { isActive?: boolean | string; page?: number; limit?: number; sort?: any } = {}) => {
+    list: (params: { isActive?: boolean | string; page?: number; limit?: number; sort?: string | Record<string, unknown> } = {}) => {
         const q = buildQuery(params as Record<string, unknown>);
         return api.get<BannersListResponse>(`/admin/banners?${q}`).then((r) => r.data);
     },

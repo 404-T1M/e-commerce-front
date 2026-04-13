@@ -22,6 +22,11 @@ export interface ImageAsset {
   url?: string;
 }
 
+export type IdRef = { id?: string; _id?: string };
+export type UserRef = IdRef & { name?: string; email?: string; mobilePhone?: string };
+export type AdminRef = string | UserRef | null;
+export type ImageRef = ImageAsset | { imageUrl?: string; url?: string; fileName?: string } | string | null;
+
 // ─── API Response Shapes ───────────────────────────────────────────────────────
 export interface ApiError {
   status: "fail" | "error";
@@ -70,6 +75,49 @@ export interface UserListItem {
   status: boolean;
   createdAt: string;
 }
+
+export interface UserListResponse {
+  users: UserListItem[];
+  meta: MetaPagination;
+}
+
+export interface UserDetailsResponse {
+  user: UserListItem;
+}
+
+export interface UserActionResponse {
+  message: string;
+  user?: UserListItem;
+}
+
+export interface UsersQueryParams {
+  name?: string;
+  status?: boolean | string;
+  emailVerified?: boolean | string;
+  page?: number;
+  limit?: number;
+}
+
+export interface AdminsQueryParams {
+  name?: string;
+  status?: boolean | string;
+  page?: number;
+  limit?: number;
+}
+
+export interface AddAdminRequest {
+  name: string;
+  email: string;
+  mobilePhone: string;
+  password: string;
+  adminGroup: string;
+}
+
+export interface UpdateAdminGroupRequest {
+  adminGroup: string;
+}
+
+export const PERMISSIONS: string[] = [
   "coupons.list",
   "coupons.create",
   "coupons.update",
@@ -101,6 +149,12 @@ export interface UserListItem {
   "reports.customers",
   "reports.deliveryMen",
 ];
+
+export type Permission = string;
+
+export interface PermissionsListResponse {
+  permissions: Permission[];
+}
 
 // ─── Admin Group Types ─────────────────────────────────────────────────────────
 export interface AdminGroup {
@@ -165,6 +219,7 @@ export interface CategoryAttributeRef {
  * Full category object as returned by categoryDataResponseDTO
  */
 export interface CategoryData {
+  _id?: string;
   id: string;
   name: LocalizedString;
   slug: string;
@@ -327,11 +382,12 @@ export interface CheapestVariant {
 }
 
 export interface Product {
+  _id?: string;
   id: string;
   name: LocalizedString;
   description: LocalizedString;
   images?: ProductImage[];
-  category: string | { id: string; name: LocalizedString; attributes?: any } | null;
+  category: string | { id: string; name: LocalizedString; attributes?: CategoryData["attributes"] } | null;
   variants?: ProductVariant[];
   /** Cheapest variant returned by getAllProducts listing */
   cheapestVariant?: CheapestVariant;
@@ -367,6 +423,22 @@ export interface ProductsQueryParams {
   sort?: "price_asc" | "price_desc" | "newest" | "oldest";
   page?: number;
   limit?: number;
+}
+
+export interface ProductDetailsResponse {
+  product: { product: Product; variants: ProductVariant[] };
+}
+
+export interface ProductFilterAttributeOption {
+  attributeId: string;
+  name: LocalizedString;
+  values: string[];
+}
+
+export interface ProductFilterOptionsResponse {
+  sortOptions?: Array<{ key: string; label: LocalizedString }>;
+  priceRange?: { min: number; max: number };
+  attributes?: ProductFilterAttributeOption[];
 }
 
 /**

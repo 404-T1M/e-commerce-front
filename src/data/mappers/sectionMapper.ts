@@ -1,6 +1,8 @@
 import type { Section, SectionDataPopulated } from '@/types';
 
-export function normalizeSection(section: Section): Section {
+export type NormalizedSection = Omit<Section, 'data'> & { data: SectionDataPopulated };
+
+export function normalizeSection(section: Section): NormalizedSection {
     const data = section.data as SectionDataPopulated;
     return {
         ...section,

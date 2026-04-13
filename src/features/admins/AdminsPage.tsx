@@ -10,7 +10,7 @@ import { useAdmins } from './useAdmins';
 
 export function AdminsPage() {
     const {
-        page, setPage,
+        setPage,
         search, setSearch,
         status, setStatus,
         addOpen, setAddOpen,

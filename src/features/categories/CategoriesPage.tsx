@@ -18,7 +18,7 @@ export function CategoriesPage() {
     const {
         query, attributesQuery,
         categories, meta, allAttributes, isLoading,
-        page, setPage, search, setSearch, filterPublished, setFilterPublished,
+        setPage, search, setSearch, filterPublished, setFilterPublished,
         parent, setParent,
         createMutation, updateMutation, deleteMutation, togglePublishMutation,
     } = useCategories();
@@ -34,14 +34,12 @@ export function CategoriesPage() {
     const editImgRef = useRef<HTMLInputElement | null>(null);
 
     const createForm = useForm<CategoryFormValues>({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        resolver: zodResolver(categorySchema) as any,
+        resolver: zodResolver(categorySchema),
         defaultValues: { published: false, isFeatured: false, parent: '' },
     });
 
     const editForm = useForm<CategoryFormValues>({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        resolver: zodResolver(categorySchema) as any,
+        resolver: zodResolver(categorySchema),
         defaultValues: { published: false, isFeatured: false, parent: '' },
     });
 

@@ -42,8 +42,8 @@ export interface Order {
         city: string;
         country: string;
     };
-    shippingMethod?: { id?: string; name: any; price: number };
-    paymentMethod?: { key: string; name: string };
+    shippingMethod?: { id?: string; name: import('@/types').LocalizedString | string; price: number };
+    paymentMethod?: { key: string; name: import('@/types').LocalizedString | string };
     pricing: {
         subtotal: number;
         shipping: number;
@@ -52,7 +52,7 @@ export interface Order {
     };
     status: OrderStatus;
     paymentStatus?: string;
-    coupon?: any;
+    coupon?: { code?: string; discount?: { type?: string; value?: number } } | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -86,7 +86,7 @@ export const ordersApi = {
     // ── ADMIN ──
 
     /** GET /admin/orders */
-    adminGetAll: (params: { page?: number; limit?: number; status?: string; paymentStatus?: string } = {}) => {
+    adminGetAll: (params: { page?: number; limit?: number; status?: string; paymentStatus?: string; orderNumber?: string } = {}) => {
         const q = buildQuery(params as Record<string, unknown>);
         return api.get<OrdersListResponse>(`/admin/orders?${q}`).then((r) => r.data);
     },

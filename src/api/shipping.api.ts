@@ -1,7 +1,6 @@
 import userApi from './user-axios';
 import api from './axios';
 import { buildQuery } from '@/utils';
-import type { MetaPagination } from '@/types';
 
 export interface ShippingMethod {
     _id: string;

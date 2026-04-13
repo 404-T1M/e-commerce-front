@@ -1,11 +1,9 @@
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { attributesApi } from '@/api/attributes.api';
 import { useToast } from '@/components/Toast';
 import type { AttributeFormValues } from './types';
-
-type AE = { response?: { data?: { message?: string } } };
+import { getApiErrorMessage } from '@/utils';
 
 export const LIMIT = 15;
 
@@ -58,7 +56,7 @@ export function useAttributes() {
             toast.success(res.message ?? 'Attribute created');
             qc.invalidateQueries({ queryKey: ['admin-attributes'] });
         },
-        onError: (err: AE) => toast.error(err.response?.data?.message ?? 'Failed to create'),
+        onError: (err: unknown) => toast.error(getApiErrorMessage(err, 'Failed to create')),
     });
 
     const deleteMutation = useMutation({
@@ -67,7 +65,7 @@ export function useAttributes() {
             toast.success(res.message ?? 'Attribute deleted');
             qc.invalidateQueries({ queryKey: ['admin-attributes'] });
         },
-        onError: (err: AE) => toast.error(err.response?.data?.message ?? 'Failed to delete'),
+        onError: (err: unknown) => toast.error(getApiErrorMessage(err, 'Failed to delete')),
     });
 
     return {

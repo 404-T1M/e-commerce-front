@@ -8,6 +8,7 @@ import { userAuthApi } from '@/api/user-auth.api';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useToast } from '@/components/Toast';
 import { useLocale } from '@/contexts/LocaleContext';
+import { getApiErrorMessage } from '@/utils';
 
 const schema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -65,7 +66,7 @@ export function RegisterPage() {
     }, [isAuthenticated, navigate]);
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
-        resolver: zodResolver(schema) as any,
+        resolver: zodResolver(schema),
     });
 
     const onSubmit = async (data: FormValues) => {
@@ -79,8 +80,8 @@ export function RegisterPage() {
             });
             toast(copy.success, 'success');
             navigate(`/verify-email?email=${encodeURIComponent(data.email)}`);
-        } catch (err: any) {
-            toast(err?.response?.data?.message ?? copy.fail, 'error');
+        } catch (err: unknown) {
+            toast(getApiErrorMessage(err, copy.fail), 'error');
         } finally {
             setIsLoading(false);
         }

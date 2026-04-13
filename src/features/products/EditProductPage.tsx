@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useProductForm } from './useProductForm';
-import { ArrowLeft, Loader2, Package, Image as ImageIcon, Plus, X } from 'lucide-react';
+import { ArrowLeft, Loader2, Package, Image as ImageIcon } from 'lucide-react';
 import type { ProductFormValues } from './types';
 import { AccessDeniedState } from '@/components/AccessDeniedState';
 import { DEFAULT_CURRENCY } from '@/utils';
@@ -21,7 +21,6 @@ export function EditProductPage() {
 
     const { register, handleSubmit, watch, formState: { errors } } = form;
     const discountType = watch('discountType');
-    const selectedCategoryId = watch('category');
 
     const field = (name: keyof ProductFormValues, label: string, opts?: { type?: string; dir?: string; placeholder?: string; min?: string; max?: string }) => (
         <div>

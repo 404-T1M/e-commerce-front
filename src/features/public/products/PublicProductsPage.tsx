@@ -11,64 +11,71 @@ import { categoriesApi } from "@/api/categories.api";
 import { ProductCard } from "./components/ProductCard";
 import { useState } from "react";
 import { useLocale } from "@/contexts/LocaleContext";
-import { DEFAULT_CURRENCY, formatCurrency, getIntlLocale, pickLocale } from "@/utils";
+import {
+  DEFAULT_CURRENCY,
+  formatCurrency,
+  getIntlLocale,
+  pickLocale,
+} from "@/utils";
+import type { ProductsQueryParams } from "@/types";
 
 export function PublicProductsPage() {
   const { t, locale } = useLocale();
   const intlLocale = getIntlLocale(locale);
   const currency = DEFAULT_CURRENCY;
   const [searchParams, setSearchParams] = useSearchParams();
-  const copy = locale === "ar"
-    ? {
-        sortBy: "ترتيب حسب",
-        defaultSorting: "الترتيب الافتراضي",
-        categories: "الفئات",
-        allCategories: "كل الفئات",
-        loadingCategories: "جارٍ تحميل الفئات...",
-        noCategories: "لا توجد فئات متاحة",
-        priceRange: "نطاق السعر",
-        min: "أقل",
-        max: "أقصى",
-        unknown: "غير معروف",
-        attribute: "خاصية",
-        noAttributeFilters: "هذه الفئة لا تحتوي على فلاتر للخصائص.",
-        pickCategoryFilters: "اختر فئة لعرض فلاتر إضافية.",
-        clearAllFilters: "مسح كل الفلاتر",
-        oops: "عذرًا!",
-        loadFailed: "تعذر تحميل المنتجات. حاول مرة أخرى لاحقًا.",
-        noProducts: "لا توجد منتجات",
-        noProductsDesc:
-          "لم نعثر على منتجات تطابق الفلاتر الحالية. جرّب تعديل معايير البحث.",
-        showing: (count: number, total: number) =>
-          `عرض ${count} من ${total} منتج`,
-        pageOf: (page: number, totalPages: number) =>
-          `الصفحة ${page} من ${totalPages}`,
-      }
-    : {
-        sortBy: "Sort By",
-        defaultSorting: "Default sorting",
-        categories: "Categories",
-        allCategories: "All Categories",
-        loadingCategories: "Loading categories...",
-        noCategories: "No categories available",
-        priceRange: "Price Range",
-        min: "Min",
-        max: "Max",
-        unknown: "Unknown",
-        attribute: "Attribute",
-        noAttributeFilters: "This category has no attribute filters.",
-        pickCategoryFilters: "Select a category to see more filters",
-        clearAllFilters: "Clear All Filters",
-        oops: "Oops!",
-        loadFailed: "Failed to load products. Please try again later.",
-        noProducts: "No products found",
-        noProductsDesc:
-          "We couldn't find any products matching your current filters. Try adjusting your search criteria.",
-        showing: (count: number, total: number) =>
-          `Showing ${count} of ${total} products`,
-        pageOf: (page: number, totalPages: number) =>
-          `Page ${page} of ${totalPages}`,
-      };
+  const copy =
+    locale === "ar"
+      ? {
+          sortBy: "ترتيب حسب",
+          defaultSorting: "الترتيب الافتراضي",
+          categories: "الفئات",
+          allCategories: "كل الفئات",
+          loadingCategories: "جارٍ تحميل الفئات...",
+          noCategories: "لا توجد فئات متاحة",
+          priceRange: "نطاق السعر",
+          min: "أقل",
+          max: "أقصى",
+          unknown: "غير معروف",
+          attribute: "خاصية",
+          noAttributeFilters: "هذه الفئة لا تحتوي على فلاتر للخصائص.",
+          pickCategoryFilters: "اختر فئة لعرض فلاتر إضافية.",
+          clearAllFilters: "مسح كل الفلاتر",
+          oops: "عذرًا!",
+          loadFailed: "تعذر تحميل المنتجات. حاول مرة أخرى لاحقًا.",
+          noProducts: "لا توجد منتجات",
+          noProductsDesc:
+            "لم نعثر على منتجات تطابق الفلاتر الحالية. جرّب تعديل معايير البحث.",
+          showing: (count: number, total: number) =>
+            `عرض ${count} من ${total} منتج`,
+          pageOf: (page: number, totalPages: number) =>
+            `الصفحة ${page} من ${totalPages}`,
+        }
+      : {
+          sortBy: "Sort By",
+          defaultSorting: "Default sorting",
+          categories: "Categories",
+          allCategories: "All Categories",
+          loadingCategories: "Loading categories...",
+          noCategories: "No categories available",
+          priceRange: "Price Range",
+          min: "Min",
+          max: "Max",
+          unknown: "Unknown",
+          attribute: "Attribute",
+          noAttributeFilters: "This category has no attribute filters.",
+          pickCategoryFilters: "Select a category to see more filters",
+          clearAllFilters: "Clear All Filters",
+          oops: "Oops!",
+          loadFailed: "Failed to load products. Please try again later.",
+          noProducts: "No products found",
+          noProductsDesc:
+            "We couldn't find any products matching your current filters. Try adjusting your search criteria.",
+          showing: (count: number, total: number) =>
+            `Showing ${count} of ${total} products`,
+          pageOf: (page: number, totalPages: number) =>
+            `Page ${page} of ${totalPages}`,
+        };
 
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
 
@@ -84,7 +91,9 @@ export function PublicProductsPage() {
   const priceMax = searchParams.get("priceMax")
     ? Number(searchParams.get("priceMax"))
     : undefined;
-  const sort = searchParams.get("sort") as any;
+  const sort =
+    (searchParams.get("sort") as ProductsQueryParams["sort"] | null) ??
+    undefined;
 
   // The backend might not support dynamic attribute filtering natively in exactly this way yet,
   // but we can pass them in the query params so it's ready if the backend accepts `attributes[Size]=Large`.
@@ -109,7 +118,7 @@ export function PublicProductsPage() {
     ],
     queryFn: () => {
       // Build filters
-      const params: Record<string, any> = {
+      const params: ProductsQueryParams & { attributes?: string[] } = {
         page,
         limit,
         name,
@@ -135,7 +144,7 @@ export function PublicProductsPage() {
       }
       if (attributes.length) params.attributes = attributes;
 
-      return productsApi.getPublicList(params as any);
+      return productsApi.getPublicList(params);
     },
   });
 
@@ -238,13 +247,13 @@ export function PublicProductsPage() {
             value={name}
             onChange={(e) => updateFilters("name", e.target.value)}
             className="block w-full pl-12 pr-32 py-3 border-2 border-transparent rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 focus:border-brand-500 transition-colors text-base"
-            placeholder={`${t('search')}...`}
+            placeholder={`${t("search")}...`}
           />
           <button
             type="submit"
             className="absolute inset-y-1.5 right-1.5 flex items-center px-6 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium transition-colors"
           >
-            {t('search')}
+            {t("search")}
           </button>
         </form>
       </div>
@@ -257,7 +266,7 @@ export function PublicProductsPage() {
             className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200 font-medium text-gray-700 hover:bg-gray-50"
           >
             <SlidersHorizontal size={18} />
-            {t('filters')}
+            {t("filters")}
           </button>
         </div>
 
@@ -267,7 +276,7 @@ export function PublicProductsPage() {
         >
           <div className="flex items-center gap-2 font-bold text-lg text-gray-900 mb-6 pb-4 border-b border-gray-100">
             <SlidersHorizontal size={20} className="text-brand-600" />
-            {t('filters')}
+            {t("filters")}
           </div>
 
           <div className="space-y-8">
@@ -282,7 +291,7 @@ export function PublicProductsPage() {
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all bg-gray-50 font-medium text-gray-700 cursor-pointer hover:bg-white"
               >
                 <option value="">{copy.defaultSorting}</option>
-                {sortOptions.map((opt: any) => (
+                {sortOptions.map((opt) => (
                   <option key={opt.key} value={opt.key}>
                     {pickLocale(opt.label, locale, opt.key)}
                   </option>
@@ -311,8 +320,8 @@ export function PublicProductsPage() {
                       {copy.allCategories}
                     </span>
                   </label>
-                  {categories.map((cat: any) => {
-                    const id = cat._id || cat.id;
+                  {categories.map((cat) => {
+                    const id = cat._id ?? cat.id;
                     const isChecked = selectedCategories.includes(id);
                     return (
                       <label
@@ -352,7 +361,8 @@ export function PublicProductsPage() {
                 <span>{copy.priceRange}</span>
                 {(apiPriceRange.min > 0 || apiPriceRange.max > 0) && (
                   <span className="text-gray-400 font-normal text-[10px] lowercase">
-                    ({formatCurrency(apiPriceRange.min, currency, intlLocale)} - {formatCurrency(apiPriceRange.max, currency, intlLocale)})
+                    ({formatCurrency(apiPriceRange.min, currency, intlLocale)} -{" "}
+                    {formatCurrency(apiPriceRange.max, currency, intlLocale)})
                   </span>
                 )}
               </h3>
@@ -378,7 +388,7 @@ export function PublicProductsPage() {
             {/* Category-Specific Attributes (show when at least one category chosen) */}
             {selectedCategories.length > 0 &&
               dynamicAttributes.length > 0 &&
-              dynamicAttributes.map((attr: any) => (
+              dynamicAttributes.map((attr) => (
                 <div key={attr.attributeId}>
                   <h3 className="font-semibold text-gray-900 mb-4 uppercase text-xs tracking-wider">
                     {pickLocale(attr.name, locale, copy.attribute)}
@@ -482,9 +492,7 @@ export function PublicProductsPage() {
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 {copy.noProducts}
               </h3>
-              <p className="text-gray-500 max-w-sm">
-                {copy.noProductsDesc}
-              </p>
+              <p className="text-gray-500 max-w-sm">{copy.noProductsDesc}</p>
               <button
                 onClick={() => {
                   setSearchParams(new URLSearchParams());

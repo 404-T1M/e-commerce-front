@@ -164,6 +164,8 @@ export function MyOrdersPage() {
                 <div className="space-y-4">
                     {orders.map((order) => {
                         const orderId = order._id || order.id;
+                        const statusKey = order.status ?? 'pending';
+                        const paymentKey = order.paymentStatus ?? 'pending';
                         return (
                             <Link
                                 key={orderId}
@@ -174,16 +176,16 @@ export function MyOrdersPage() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-3 flex-wrap">
                                             <code className="text-xs bg-gray-100 px-2 py-0.5 rounded font-mono">{order.orderNumber || `#${orderId?.slice(-8).toUpperCase()}`}</code>
-                                            <span className={cn('inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize', STATUS_STYLES[order.status] ?? STATUS_STYLES.pending)}>
-                                                {statusLabels[order.status] ?? order.status}
+                                            <span className={cn('inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize', STATUS_STYLES[statusKey] ?? STATUS_STYLES.pending)}>
+                                                {statusLabels[statusKey] ?? statusKey}
                                             </span>
                                             <span className={cn('inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize', 
-                                                order.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700' : 
-                                                order.paymentStatus === 'failed' ? 'bg-red-50 text-red-700' : 
-                                                order.paymentStatus === 'refunded' ? 'bg-slate-50 text-slate-700' : 
+                                                paymentKey === 'paid' ? 'bg-emerald-50 text-emerald-700' : 
+                                                paymentKey === 'failed' ? 'bg-red-50 text-red-700' : 
+                                                paymentKey === 'refunded' ? 'bg-slate-50 text-slate-700' : 
                                                 'bg-amber-50 text-amber-700'
                                             )}>
-                                                {paymentLabels[order.paymentStatus] ?? copy.pending}
+                                                {paymentLabels[paymentKey] ?? copy.pending}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-4 mt-2">

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, EyeOff, Trash2, Search, Filter, Package, Plus } from 'lucide-react';
+import { Eye, EyeOff, Trash2, Search, Package, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DataTable, Pagination, type ColumnDef } from '@/components/DataTable';
 import { PublishedBadge } from '@/components/ui/Badge';
@@ -7,11 +7,11 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { AccessDeniedState } from '@/components/AccessDeniedState';
 import { formatDate, formatCurrency, cn, isForbiddenError } from '@/utils';
 import type { Product } from '@/types';
-import { useProducts, LIMIT } from './useProducts';
+import { useProducts } from './useProducts';
 
 export function ProductsPage() {
     const {
-        page, setPage,
+        setPage,
         search, setSearch,
         filterPublished, setFilterPublished,
         sort, setSort,
@@ -60,7 +60,7 @@ export function ProductsPage() {
             cell: (row) => {
                 const cat = row.category;
                 if (!cat || typeof cat === 'string') return <span className="text-xs text-slate-400">—</span>;
-                const catName = (cat as any).name?.en || (cat as any).name?.ar || '—';
+                const catName = cat.name?.en || cat.name?.ar || '—';
                 return (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap">
                         {catName}

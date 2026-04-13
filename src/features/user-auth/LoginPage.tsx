@@ -7,6 +7,7 @@ import { ShoppingBag, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useToast } from '@/components/Toast';
 import { useLocale } from '@/contexts/LocaleContext';
+import { getApiErrorMessage } from '@/utils';
 
 const schema = z.object({
     email: z.string().min(1, 'Email is required').email('Invalid email'),
@@ -46,7 +47,7 @@ export function LoginPage() {
         invalid: 'Invalid credentials. Please try again.',
     };
 
-    const from = (location.state as any)?.from?.pathname || '/';
+    const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/';
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -55,7 +56,7 @@ export function LoginPage() {
     }, [isAuthenticated, navigate, from]);
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
-        resolver: zodResolver(schema) as any,
+        resolver: zodResolver(schema),
     });
 
     const onSubmit = async (data: FormValues) => {
@@ -64,8 +65,8 @@ export function LoginPage() {
             await login(data.email, data.password);
             toast(copy.success, 'success');
             navigate(from, { replace: true });
-        } catch (err: any) {
-            toast(err?.response?.data?.message ?? copy.invalid, 'error');
+        } catch (err: unknown) {
+            toast(getApiErrorMessage(err, copy.invalid), 'error');
         } finally {
             setIsLoading(false);
         }

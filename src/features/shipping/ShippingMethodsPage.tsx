@@ -7,7 +7,7 @@ import { Modal } from '@/components/Modal';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useToast } from '@/components/Toast';
 import { AccessDeniedState } from '@/components/AccessDeniedState';
-import { DEFAULT_CURRENCY, formatCurrency, formatDate, getIntlLocale, pickLocale, isForbiddenError } from '@/utils';
+import { DEFAULT_CURRENCY, formatCurrency, formatDate, getApiErrorMessage, getIntlLocale, pickLocale, isForbiddenError } from '@/utils';
 import { shippingApi, type ShippingMethod } from '@/api/shipping.api';
 import { useLocale } from '@/contexts/LocaleContext';
 
@@ -111,10 +111,6 @@ export function ShippingMethodsPage() {
         }),
     });
 
-    if (isForbiddenError(error)) {
-        return <AccessDeniedState />;
-    }
-
     const setPage = (newPage: number) => {
         const params = new URLSearchParams(searchParams);
         params.set('page', newPage.toString());
@@ -129,20 +125,24 @@ export function ShippingMethodsPage() {
     const createMutation = useMutation({
         mutationFn: (fd: FormData) => shippingApi.adminCreate(fd),
         onSuccess: () => { toast(copy.toast.created, 'success'); setCreateOpen(false); invalidate(); },
-        onError: (e: any) => toast(e?.response?.data?.message ?? copy.toast.error, 'error'),
+        onError: (e: unknown) => toast(getApiErrorMessage(e, copy.toast.error), 'error'),
     });
 
     const updateMutation = useMutation({
         mutationFn: ({ id, fd }: { id: string; fd: FormData }) => shippingApi.adminUpdate(id, fd),
         onSuccess: () => { toast(copy.toast.updated, 'success'); setEditTarget(null); invalidate(); },
-        onError: (e: any) => toast(e?.response?.data?.message ?? copy.toast.error, 'error'),
+        onError: (e: unknown) => toast(getApiErrorMessage(e, copy.toast.error), 'error'),
     });
 
     const deleteMutation = useMutation({
         mutationFn: (id: string) => shippingApi.adminDelete(id),
         onSuccess: () => { toast(copy.toast.deleted, 'success'); setDeleteTarget(null); invalidate(); },
-        onError: (e: any) => toast(e?.response?.data?.message ?? copy.toast.error, 'error'),
+        onError: (e: unknown) => toast(getApiErrorMessage(e, copy.toast.error), 'error'),
     });
+
+    if (isForbiddenError(error)) {
+        return <AccessDeniedState />;
+    }
 
     const columns: ColumnDef<ShippingMethod>[] = [
         {

@@ -13,7 +13,7 @@ export function BannersPage() {
         page, setPage,
         isActive, updateFilters,
         bannersQuery,
-        banners, meta, isLoading, refetch,
+        banners, meta, isLoading,
         createMutation, updateMutation, deleteMutation,
     } = useBanners();
 

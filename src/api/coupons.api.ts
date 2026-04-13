@@ -1,6 +1,6 @@
 import api from './axios';
 import { buildQuery } from '@/utils';
-import type { MessageResponse, MetaPagination } from '@/types';
+import type { MessageResponse, MetaPagination, ImageRef, AdminRef } from '@/types';
 
 export interface Coupon {
     id: string;
@@ -18,8 +18,8 @@ export interface Coupon {
         maxDiscountAmount: number | null;
     };
     applicableCategories: Array<{ id: string; name: { en: string; ar: string } }>;
-    applicableProducts: Array<{ id: string; name: { en: string; ar: string }; image: any }>;
-    allowedUsers: Array<{ id: string; name: string; email: string; image: any }>;
+    applicableProducts: Array<{ id: string; name: { en: string; ar: string }; image: ImageRef }>;
+    allowedUsers: Array<{ id: string; name: string; email: string; image: ImageRef }>;
     usage: {
         usageLimit: number | null;
         usedCount: number;
@@ -28,7 +28,7 @@ export interface Coupon {
     status: {
         isActive: boolean;
     };
-    createdBy: any;
+    createdBy: AdminRef;
     createdAt: string;
 }
 

@@ -7,7 +7,7 @@ import { DataTable, type ColumnDef, Pagination } from '@/components/DataTable';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/components/Toast';
 import { AccessDeniedState } from '@/components/AccessDeniedState';
-import { formatDateTime, cn, isForbiddenError } from '@/utils';
+import { formatDateTime, cn, getApiErrorMessage, isForbiddenError } from '@/utils';
 
 export function ReviewsPage() {
     const queryClient = useQueryClient();
@@ -15,6 +15,7 @@ export function ReviewsPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const page = Number(searchParams.get('page')) || 1;
     const publishedFilter = (searchParams.get('status') as 'all' | 'published' | 'pending') || 'all';
+    type PublishedFilter = 'all' | 'published' | 'pending';
 
     const setPage = (p: number) => {
         const params = new URLSearchParams(searchParams);
@@ -22,7 +23,7 @@ export function ReviewsPage() {
         setSearchParams(params);
     };
 
-    const setPublishedFilter = (value: 'all' | 'published' | 'pending') => {
+    const setPublishedFilter = (value: PublishedFilter) => {
         const params = new URLSearchParams(searchParams);
         if (value === 'all') params.delete('status');
         else params.set('status', value);
@@ -46,10 +47,6 @@ export function ReviewsPage() {
         }),
     });
 
-    if (isForbiddenError(error)) {
-        return <AccessDeniedState />;
-    }
-
     const reviews = data?.reviews || [];
     const meta = data?.pagination;
 
@@ -61,8 +58,8 @@ export function ReviewsPage() {
             toast(data.message, 'success');
             queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
         },
-        onError: (err: any) => {
-            toast(err?.response?.data?.message || 'Failed to update status', 'error');
+        onError: (err: unknown) => {
+            toast(getApiErrorMessage(err, 'Failed to update status'), 'error');
         }
     });
 
@@ -74,10 +71,14 @@ export function ReviewsPage() {
             queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
             setDeleteModal({ isOpen: false, reviewId: '', reason: '' });
         },
-        onError: (err: any) => {
-            toast(err?.response?.data?.message || 'Failed to delete review', 'error');
+        onError: (err: unknown) => {
+            toast(getApiErrorMessage(err, 'Failed to delete review'), 'error');
         }
     });
+
+    if (isForbiddenError(error)) {
+        return <AccessDeniedState />;
+    }
 
     const columns: ColumnDef<Review>[] = [
         {
@@ -204,7 +205,7 @@ export function ReviewsPage() {
                         <select 
                             className="input-base pl-9 w-full rounded-2xl"
                             value={publishedFilter}
-                            onChange={(e) => setPublishedFilter(e.target.value as any)}
+                            onChange={(e) => setPublishedFilter(e.target.value as PublishedFilter)}
                         >
                             <option value="all">All Reviews</option>
                             <option value="published">Published Only</option>

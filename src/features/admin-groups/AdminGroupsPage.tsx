@@ -10,7 +10,7 @@ import { PermissionsSelector } from './PermissionsSelector';
 
 export function AdminGroupsPage() {
     const {
-        page, setPage,
+        setPage,
         search, setSearch,
         groupsQuery, groups, meta,
         permissionsQuery, availablePermissions,

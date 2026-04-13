@@ -128,3 +128,18 @@ export function isForbiddenError(error: unknown): boolean {
 export function isUnauthorizedError(error: unknown): boolean {
   return getErrorStatus(error) === 401;
 }
+
+type ErrorWithResponse = { response?: { data?: { message?: string } } };
+
+/** Safely extract API error message from an unknown error. */
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object") {
+    const res = (error as ErrorWithResponse).response;
+    const msg = res?.data?.message;
+    if (msg) return msg;
+    const maybeMessage = (error as { message?: string }).message;
+    if (maybeMessage) return maybeMessage;
+  }
+  return fallback;
+}

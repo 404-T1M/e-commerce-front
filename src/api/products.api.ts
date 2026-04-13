@@ -5,7 +5,8 @@ import type {
     ProductUpdateResponse,
     MessageResponse,
     ProductsQueryParams,
-    ToggleProductPublishResponse,
+    ProductDetailsResponse,
+    ProductFilterOptionsResponse,
 } from '@/types';
 import { buildQuery } from '@/utils';
 
@@ -25,7 +26,7 @@ export const productsApi = {
      * Returns: { product: Product }
      */
     getById: (productId: string) =>
-        api.get<{ product: { product: import('@/types').Product, variants: any[] } }>(`/admin/products/${productId}`).then((r) => r.data),
+        api.get<ProductDetailsResponse>(`/admin/products/${productId}`).then((r) => r.data),
 
     /**
      * POST /admin/products/add-product
@@ -103,6 +104,6 @@ export const productsApi = {
      */
     getFilterOptions: (params: Record<string, unknown> = {}) => {
         const q = buildQuery(params);
-        return api.get<any>(`/products/filter-options?${q}`).then((r) => r.data);
+        return api.get<ProductFilterOptionsResponse>(`/products/filter-options?${q}`).then((r) => r.data);
     }
 };

@@ -6,7 +6,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useToast } from '@/components/Toast';
 import { useLocale } from '@/contexts/LocaleContext';
-import { DEFAULT_CURRENCY, formatCurrency, getIntlLocale, pickLocale } from '@/utils';
+import { DEFAULT_CURRENCY, formatCurrency, getApiErrorMessage, getIntlLocale, pickLocale } from '@/utils';
 
 export function CartPage() {
     const { items, count, totalPrice, finalTotalPrice, couponPreview, updateQuantity, removeItem, applyCoupon, clearCoupon, isLoading, refreshCart } = useCart();
@@ -81,7 +81,7 @@ export function CartPage() {
         if (isAuthenticated) {
             refreshCart();
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, refreshCart]);
 
     const handleApplyCoupon = async () => {
         if (!couponCode.trim()) return;
@@ -89,8 +89,8 @@ export function CartPage() {
             setCouponLoading(true);
             const preview = await applyCoupon(couponCode.trim());
             toast(copy.couponToast(preview.discount), 'success');
-        } catch (err: any) {
-            toast(err?.response?.data?.message ?? copy.invalidCoupon, 'error');
+        } catch (err: unknown) {
+            toast(getApiErrorMessage(err, copy.invalidCoupon), 'error');
         } finally {
             setCouponLoading(false);
         }

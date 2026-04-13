@@ -1,18 +1,16 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { variantsApi } from "@/api/variants.api";
 import { useToast } from "@/components/Toast";
 import {
-  variantSchema,
   variantsFormSchema,
+  type VariantsFormInput,
   type VariantsFormValues,
 } from "./types";
 import type { ProductVariant } from "@/types";
-
-type AE = { response?: { data?: { message?: string } } };
+import { getApiErrorMessage } from "@/utils";
 
 export function useVariants(productId: string) {
   const qc = useQueryClient();
@@ -22,11 +20,10 @@ export function useVariants(productId: string) {
   const [editingVariant, setEditingVariant] = useState<ProductVariant | null>(
     null,
   );
-  const [images, setImages] = useState<Record<number, File>>({});
+  const [images, setImages] = useState<Record<number, File | null>>({});
 
-  const form = useForm<VariantsFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(variantsFormSchema) as any,
+  const form = useForm<VariantsFormInput, unknown, VariantsFormValues>({
+    resolver: zodResolver(variantsFormSchema),
     defaultValues: { variants: [{ stock: "0", attributes: [] }] },
   });
 
@@ -64,7 +61,9 @@ export function useVariants(productId: string) {
               attributeId:
                 typeof a.attribute === "string"
                   ? a.attribute
-                  : ((a.attribute as any)?.id ?? ""),
+                  : ((a.attribute as { id?: string; _id?: string })?.id ??
+                    (a.attribute as { _id?: string })?._id ??
+                    ""),
               value: String(a.value ?? ""),
             }))
             .filter((a) => !!a.attributeId),
@@ -132,8 +131,8 @@ export function useVariants(productId: string) {
       qc.invalidateQueries({ queryKey: ["product-details", productId] });
       setIsFormOpen(false);
     },
-    onError: (err: AE) =>
-      toast.error(err.response?.data?.message ?? "Failed to save variant"),
+    onError: (err: unknown) =>
+      toast.error(getApiErrorMessage(err, "Failed to save variant")),
   });
 
   const deleteMutation = useMutation({
@@ -142,8 +141,8 @@ export function useVariants(productId: string) {
       toast.success("Variant deleted");
       qc.invalidateQueries({ queryKey: ["product-details", productId] });
     },
-    onError: (err: AE) =>
-      toast.error(err.response?.data?.message ?? "Failed to delete variant"),
+    onError: (err: unknown) =>
+      toast.error(getApiErrorMessage(err, "Failed to delete variant")),
   });
 
   const toggleMutation = useMutation({
@@ -152,8 +151,8 @@ export function useVariants(productId: string) {
       toast.success(res.message ?? "Status updated");
       qc.invalidateQueries({ queryKey: ["product-details", productId] });
     },
-    onError: (err: AE) =>
-      toast.error(err.response?.data?.message ?? "Failed to update status"),
+    onError: (err: unknown) =>
+      toast.error(getApiErrorMessage(err, "Failed to update status")),
   });
 
   return {

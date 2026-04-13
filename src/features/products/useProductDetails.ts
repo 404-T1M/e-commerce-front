@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { productsApi } from '@/api/products.api';
 import { attributesApi } from '@/api/attributes.api';
 import { useToast } from '@/components/Toast';
-
-type AE = { response?: { data?: { message?: string } } };
+import { getApiErrorMessage } from '@/utils';
 
 export function useProductDetails(id?: string) {
     const navigate = useNavigate();
@@ -32,7 +31,7 @@ export function useProductDetails(id?: string) {
             qc.invalidateQueries({ queryKey: ['admin-products'] });
             navigate('/admin/products');
         },
-        onError: (err: AE) => toast.error(err.response?.data?.message ?? 'Failed to delete'),
+        onError: (err: unknown) => toast.error(getApiErrorMessage(err, 'Failed to delete')),
     });
 
     const toggleMutation = useMutation({
@@ -42,18 +41,18 @@ export function useProductDetails(id?: string) {
             qc.invalidateQueries({ queryKey: ['product-details', id] });
             qc.invalidateQueries({ queryKey: ['admin-products'] });
         },
-        onError: (err: AE) => toast.error(err.response?.data?.message ?? 'Failed'),
+        onError: (err: unknown) => toast.error(getApiErrorMessage(err, 'Failed')),
     });
 
     const product = data?.product?.product;
-    const allAttributes = attributesData?.attributes ?? [];
+    const allAttributes = useMemo(() => attributesData?.attributes ?? [], [attributesData]);
 
     const categoryAttributes = useMemo(() => {
         if (!product || !product.category || typeof product.category !== 'object') return allAttributes;
 
-        const catAttrsArray = (product.category as any).attributes || [];
-        const allowedIds = new Set(catAttrsArray.map((ca: any) =>
-            typeof ca.attribute === 'string' ? ca.attribute : ca.attribute?._id || ca.attribute?.id
+        const catAttrsArray = product.category.attributes ?? [];
+        const allowedIds = new Set(catAttrsArray.map((ca) =>
+            typeof ca.attribute === 'string' ? ca.attribute : ca.attribute?._id ?? ca.attribute?.id
         ));
 
         // If the category doesn't have specific attributes defined, fallback to allowing all to avoid breaking old products.

@@ -7,7 +7,7 @@ import { DataTable, type ColumnDef, Pagination } from '@/components/DataTable';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/components/Toast';
 import { AccessDeniedState } from '@/components/AccessDeniedState';
-import { DEFAULT_CURRENCY, formatCurrency, getIntlLocale, isForbiddenError } from '@/utils';
+import { DEFAULT_CURRENCY, formatCurrency, getApiErrorMessage, getIntlLocale, isForbiddenError } from '@/utils';
 import { useLocale } from '@/contexts/LocaleContext';
 
 export function CouponsPage() {
@@ -50,13 +50,6 @@ export function CouponsPage() {
         }),
     });
 
-    if (isForbiddenError(error)) {
-        return <AccessDeniedState />;
-    }
-
-    const coupons = data?.coupons || [];
-    const meta = data?.meta;
-
     // Mutations
     const deleteMutation = useMutation({
         mutationFn: (id: string) => couponsApi.delete(id),
@@ -64,10 +57,17 @@ export function CouponsPage() {
             toast(copy.toast.deleted, 'success');
             queryClient.invalidateQueries({ queryKey: ['admin-coupons'] });
         },
-        onError: (err: any) => {
-            toast(err?.response?.data?.message || copy.toast.deleteFailed, 'error');
+        onError: (err: unknown) => {
+            toast(getApiErrorMessage(err, copy.toast.deleteFailed), 'error');
         }
     });
+
+    if (isForbiddenError(error)) {
+        return <AccessDeniedState />;
+    }
+
+    const coupons = data?.coupons || [];
+    const meta = data?.meta;
 
     const columns: ColumnDef<Coupon>[] = [
         {
@@ -288,8 +288,8 @@ function CouponFormModal({ open, onClose, coupon }: { open: boolean; onClose: ()
             queryClient.invalidateQueries({ queryKey: ['admin-coupons'] });
             onClose();
         },
-        onError: (err: any) => {
-            toast(err?.response?.data?.message || copy.toast.error, 'error');
+        onError: (err: unknown) => {
+            toast(getApiErrorMessage(err, copy.toast.error), 'error');
         }
     });
 
@@ -319,7 +319,7 @@ function CouponFormModal({ open, onClose, coupon }: { open: boolean; onClose: ()
                         <select 
                             className="input-base"
                             value={formData.discountType}
-                            onChange={(e) => setFormData({...formData, discountType: e.target.value as any})}
+                            onChange={(e) => setFormData({...formData, discountType: e.target.value as CouponCreateRequest['discountType']})}
                         >
                             <option value="percentage">{copy.modal.percentage}</option>
                             <option value="fixed">{copy.modal.fixed}</option>

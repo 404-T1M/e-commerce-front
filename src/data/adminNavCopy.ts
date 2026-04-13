@@ -79,7 +79,9 @@ export const ADMIN_NAV_COPY = {
     },
 } as const;
 
-export type AdminNavCopy = (typeof ADMIN_NAV_COPY)['en'];
+export type AdminNavCopy = {
+    [K in keyof typeof ADMIN_NAV_COPY.en]: string;
+};
 
 export function getAdminNavCopy(locale: Locale): AdminNavCopy {
     return ADMIN_NAV_COPY[locale] ?? ADMIN_NAV_COPY.en;

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
     createContext,
     useContext,
@@ -24,22 +25,34 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
 
     // Restore session on mount
     useEffect(() => {
+        let active = true;
         const token = localStorage.getItem('user_token');
         if (!token) {
-            setIsLoading(false);
-            return;
+            const timer = window.setTimeout(() => {
+                if (active) setIsLoading(false);
+            }, 0);
+            return () => {
+                active = false;
+                window.clearTimeout(timer);
+            };
         }
         userAuthApi
             .getMe()
             .then((res) => {
                 // getMe returns { user: UserData } but UserData includes token
-                setUser({ ...(res.user as any), token });
+                const userData: UserData = { ...res.user, token };
+                setUser(userData);
             })
             .catch(() => {
                 localStorage.removeItem('user_token');
                 localStorage.removeItem('user_data');
             })
-            .finally(() => setIsLoading(false));
+            .finally(() => {
+                if (active) setIsLoading(false);
+            });
+        return () => {
+            active = false;
+        };
     }, []);
 
     const login = useCallback(async (email: string, password: string) => {

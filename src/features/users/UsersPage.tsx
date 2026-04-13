@@ -1,4 +1,4 @@
-import { Search, Filter, UserX, Eye, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react';
+import { Search, UserX, Eye, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DataTable, Pagination, type ColumnDef } from '@/components/DataTable';
 import { StatusBadge, EmailVerifiedBadge, Avatar } from '@/components/ui/Badge';
@@ -11,7 +11,7 @@ import { useUsers } from './useUsers';
 export function UsersPage() {
     const {
         query, users, meta,
-        page, setPage,
+        setPage,
         filters, setFilters,
         search, setSearch,
         confirmDelete, setConfirmDelete,

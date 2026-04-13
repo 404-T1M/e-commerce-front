@@ -25,11 +25,11 @@ export const sectionsApi = {
     },
 
     /** Admin: POST /admin/sections/add-section */
-    create: (body: any) =>
+    create: (body: Record<string, unknown>) =>
         api.post<{ message: string; section: Section }>('/admin/sections/add-section', body).then((r) => r.data),
 
     /** Admin: PATCH /admin/sections/:sectionId/update */
-    update: (sectionId: string, body: any) =>
+    update: (sectionId: string, body: Record<string, unknown>) =>
         api
             .patch<{ message: string; section: Section }>(`/admin/sections/${sectionId}/update`, body)
             .then((r) => r.data),

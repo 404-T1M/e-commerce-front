@@ -14,12 +14,12 @@ import { productsApi } from "@/api/products.api";
 import { useSimilarProductsSection } from "@/application/hooks/useSections";
 import { ProductGallery } from "./components/ProductGallery";
 import { ProductReviews } from "./components/ProductReviews";
-import type { ProductVariant } from "@/types";
+import type { ProductVariant, SectionDataPopulated } from "@/types";
 import { useCart } from "@/contexts/CartContext";
 import { useUserAuth } from "@/contexts/UserAuthContext";
 import { useToast } from "@/components/Toast";
 import { useLocale } from "@/contexts/LocaleContext";
-import { DEFAULT_CURRENCY, formatCurrency, getIntlLocale, pickLocale } from "@/utils";
+import { DEFAULT_CURRENCY, formatCurrency, getApiErrorMessage, getIntlLocale, pickLocale } from "@/utils";
 
 export function PublicProductDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -102,7 +102,7 @@ export function PublicProductDetailsPage() {
   );
 
   const { data: similarSectionData } = useSimilarProductsSection(id);
-  const similarProducts = (similarSectionData?.section?.data as any)?.products || [];
+  const similarProducts = (similarSectionData?.section?.data as SectionDataPopulated | undefined)?.products ?? [];
 
   // State holds the ID of the selected variant; derive object as needed.
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
@@ -191,8 +191,8 @@ export function PublicProductDetailsPage() {
       setAddingToCart(true);
       await addToCart(selectedVariant.id, quantity);
       toast(copy.addedToCart, 'success');
-    } catch (err: any) {
-      toast(err?.response?.data?.message ?? copy.addFailed, 'error');
+    } catch (err: unknown) {
+      toast(getApiErrorMessage(err, copy.addFailed), 'error');
     } finally {
       setAddingToCart(false);
     }
@@ -455,7 +455,7 @@ export function PublicProductDetailsPage() {
             </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {similarProducts.map((p: any) => (
+            {similarProducts.map((p) => (
               <Link
                 key={p.id}
                 to={`/products/${p.id}`}

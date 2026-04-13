@@ -6,6 +6,7 @@ import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useToast } from '@/components/Toast';
 import { Modal } from '@/components/Modal';
 import { useLocale } from '@/contexts/LocaleContext';
+import { getApiErrorMessage } from '@/utils';
 
 export function MyAddressesPage() {
     const { isAuthenticated } = useUserAuth();
@@ -65,8 +66,8 @@ export function MyAddressesPage() {
             toast(copy.deleteSuccess, 'success');
             queryClient.invalidateQueries({ queryKey: ['my-addresses'] });
         },
-        onError: (err: any) => {
-            toast(err?.response?.data?.message || copy.deleteFail, 'error');
+        onError: (err: unknown) => {
+            toast(getApiErrorMessage(err, copy.deleteFail), 'error');
         }
     });
 
@@ -247,8 +248,8 @@ function AddressFormModal({ open, onClose, address }: { open: boolean, onClose: 
             queryClient.invalidateQueries({ queryKey: ['my-addresses'] });
             onClose();
         },
-        onError: (err: any) => {
-            toast(err?.response?.data?.message || copy.saveFailed, 'error');
+        onError: (err: unknown) => {
+            toast(getApiErrorMessage(err, copy.saveFailed), 'error');
         }
     });
 
