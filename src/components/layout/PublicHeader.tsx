@@ -7,6 +7,7 @@ import {
     Menu,
     X,
     User,
+    UserCircle,
     LogOut,
     Package,
     Wallet,
@@ -30,8 +31,8 @@ export function PublicHeader() {
         { to: '/products', label: t('shop'), end: false },
     ];
     const copy = locale === 'ar'
-        ? { logout: 'تسجيل الخروج', menu: 'القائمة' }
-        : { logout: 'Logout', menu: 'Menu' };
+        ? { logout: 'تسجيل الخروج', menu: 'القائمة', profile: 'حسابي' }
+        : { logout: 'Logout', menu: 'Menu', profile: 'My Profile' };
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 8);
@@ -108,8 +109,20 @@ export function PublicHeader() {
                             <DropdownMenu.Root>
                                 <DropdownMenu.Trigger asChild>
                                     <button className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-ink-700 hover:bg-ink-50 transition-colors">
-                                        <div className="w-7 h-7 rounded-full bg-brand-100 flex items-center justify-center">
-                                            <User className="w-4 h-4 text-brand-600" />
+                                        <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-brand-100 shadow-sm">
+                                            {user?.profileImage && (user.profileImage as { imageUrl?: string }).imageUrl ? (
+                                                <img
+                                                    src={(user.profileImage as { imageUrl?: string }).imageUrl!}
+                                                    alt={user.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
+                                                    <span className="text-xs font-bold text-white">
+                                                        {user?.name?.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || ''}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                         <span className="hidden sm:block truncate max-w-[120px]">{user?.name}</span>
                                     </button>
@@ -120,6 +133,14 @@ export function PublicHeader() {
                                         sideOffset={8}
                                         align="end"
                                     >
+                                        <DropdownMenu.Item asChild>
+                                            <Link
+                                                to="/account/profile"
+                                                className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-ink-700 hover:bg-ink-50 rounded-xl"
+                                            >
+                                                <UserCircle className="w-4 h-4 text-ink-400" /> {copy.profile}
+                                            </Link>
+                                        </DropdownMenu.Item>
                                         <DropdownMenu.Item asChild>
                                             <Link
                                                 to="/account/orders"
@@ -201,6 +222,9 @@ export function PublicHeader() {
                     ))}
                     {isAuthenticated ? (
                         <div className="pt-2 border-t border-slate-100 space-y-1">
+                            <Link to="/account/profile" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-ink-700 hover:bg-ink-50 transition-colors">
+                                <UserCircle className="w-4 h-4 text-ink-400" /> {copy.profile}
+                            </Link>
                             <Link to="/account/orders" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-ink-700 hover:bg-ink-50 transition-colors">
                                 <Package className="w-4 h-4 text-ink-400" /> {t('orders')}
                             </Link>

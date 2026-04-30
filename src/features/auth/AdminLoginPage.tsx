@@ -11,6 +11,8 @@ import { useToast } from '@/components/Toast';
 import { cn } from '@/utils';
 import type { AxiosError } from 'axios';
 import type { ApiError } from '@/types';
+import { ForgotPasswordModal } from '../user-auth/ForgotPasswordModal';
+import { Link } from 'react-router-dom';
 
 const schema = z.object({
     email: z.string().email('Please enter a valid email address'),
@@ -26,6 +28,7 @@ export function AdminLoginPage() {
     const location = useLocation();
     const from = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/admin/dashboard';
     const [showPassword, setShowPassword] = useState(false);
+    const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
 
     const {
         register,
@@ -69,7 +72,7 @@ export function AdminLoginPage() {
                 <div className="glass-card rounded-2xl p-8 animate-slide-up">
                     <div className="flex items-center gap-2 mb-6">
                         <Shield className="w-4 h-4 text-brand-400" />
-                        <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">
+                        <p className="text-xs text-slate-200 font-medium uppercase tracking-wider">
                             Secure Admin Access
                         </p>
                     </div>
@@ -146,6 +149,15 @@ export function AdminLoginPage() {
                                         {errors.password.message}
                                     </p>
                                 )}
+                                <div className="flex justify-end mt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsForgotModalOpen(true)}
+                                        className="text-xs text-slate-300 hover:text-slate-100 font-medium transition-colors"
+                                    >
+                                        Forgot Password?
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Submit */}
@@ -172,10 +184,21 @@ export function AdminLoginPage() {
                     </form>
                 </div>
 
+                <div className="mt-6 text-center">
+                    <Link to="/verify-email" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">
+                        Need to verify your email? Click here
+                    </Link>
+                </div>
+
                 <p className="text-center text-xs text-slate-600 mt-6">
                     Protected area · Unauthorized access is prohibited
                 </p>
             </div>
+            
+            <ForgotPasswordModal 
+                isOpen={isForgotModalOpen} 
+                onClose={() => setIsForgotModalOpen(false)} 
+            />
         </div>
     );
 }

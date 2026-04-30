@@ -19,6 +19,7 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   login: (admin: AdminUser) => void;
   logout: () => void;
+  updateAdmin: (data: Partial<AdminUser>) => void;
   isAuthenticated: boolean;
 }
 
@@ -55,6 +56,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ token: null, admin: null });
   }, []);
 
+  const updateAdmin = useCallback((data: Partial<AdminUser>) => {
+    setState((prev) => {
+      if (!prev.admin) return prev;
+      const updatedAdmin = { ...prev.admin, ...data };
+      localStorage.setItem("admin_user", JSON.stringify(updatedAdmin));
+      return { ...prev, admin: updatedAdmin };
+    });
+  }, []);
+
   useEffect(() => {
     const token = state.token;
     if (!token) return;
@@ -74,8 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: !!state.token && !isJwtExpired(state.token),
       login,
       logout,
+      updateAdmin,
     }),
-    [state, login, logout],
+    [state, login, logout, updateAdmin],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

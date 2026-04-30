@@ -25,6 +25,7 @@ export interface CreateAddressBody {
     country: string;
     postalCode?: string;
     notes?: string;
+    isPrimary?: boolean;
 }
 
 export const addressesApi = {

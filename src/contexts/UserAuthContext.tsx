@@ -13,8 +13,10 @@ interface UserAuthContextValue {
     user: UserData | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (email: string, password: string) => Promise<void>;
+    login: (data: UserLoginRequest) => Promise<void>;
     logout: () => void;
+    refreshUser: () => Promise<void>;
+    updateUser: (data: Partial<UserData>) => void;
 }
 
 const UserAuthContext = createContext<UserAuthContextValue | null>(null);
@@ -39,7 +41,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         userAuthApi
             .getMe()
             .then((res) => {
-                // getMe returns { user: UserData } but UserData includes token
                 const userData: UserData = { ...res.user, token };
                 setUser(userData);
             })
@@ -55,8 +56,8 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
-    const login = useCallback(async (email: string, password: string) => {
-        const res = await userAuthApi.login({ email, password });
+    const login = useCallback(async (reqData: UserLoginRequest) => {
+        const res = await userAuthApi.login(reqData);
         const userData = res.data;
         localStorage.setItem('user_token', userData.token);
         localStorage.setItem('user_data', JSON.stringify(userData));
@@ -69,6 +70,26 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
     }, []);
 
+    const refreshUser = useCallback(async () => {
+        const token = localStorage.getItem('user_token');
+        if (!token) return;
+        try {
+            const res = await userAuthApi.getMe();
+            const userData: UserData = { ...res.user, token };
+            setUser(userData);
+            localStorage.setItem('user_data', JSON.stringify(userData));
+        } catch { /* ignore */ }
+    }, []);
+
+    const updateUser = useCallback((data: Partial<UserData>) => {
+        setUser((prev) => {
+            if (!prev) return prev;
+            const updated = { ...prev, ...data };
+            localStorage.setItem('user_data', JSON.stringify(updated));
+            return updated;
+        });
+    }, []);
+
     return (
         <UserAuthContext.Provider
             value={{
@@ -77,6 +98,8 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
                 isLoading,
                 login,
                 logout,
+                refreshUser,
+                updateUser,
             }}
         >
             {children}

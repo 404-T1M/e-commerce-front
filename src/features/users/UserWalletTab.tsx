@@ -307,10 +307,10 @@ export function UserWalletTab({ userId }: { userId: string }) {
 
       {/* Credit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/35 animate-fade-in">
           <form
             onSubmit={handleCreditSubmit}
-            className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-slide-up"
+            className="bg-white rounded-xl border border-slate-200 shadow-lg w-full max-w-sm overflow-hidden animate-fade-in"
           >
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-bold text-gray-900">{copy.modal.title}</h3>

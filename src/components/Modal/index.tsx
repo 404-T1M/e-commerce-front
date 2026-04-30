@@ -43,11 +43,11 @@ export function Modal({
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" />
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/35 animate-fade-in" />
         <Dialog.Content
           className={cn(
             "fixed left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2",
-            "bg-white rounded-2xl shadow-2xl animate-slide-up flex flex-col max-h-[90vh]",
+            "bg-white rounded-xl shadow-lg border border-slate-200 animate-fade-in flex flex-col max-h-[90vh]",
             sizeClasses[size],
             className,
           )}

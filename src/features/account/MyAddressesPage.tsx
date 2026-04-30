@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { MapPin, Plus, Home, Phone, User, Trash2, Edit2, CheckCircle, Globe } from 'lucide-react';
+import { MapPin, Plus, Home, Phone, User, Trash2, Edit2, CheckCircle, Globe, Star } from 'lucide-react';
 import { addressesApi, type Address, type CreateAddressBody } from '@/api/addresses.api';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import { useToast } from '@/components/Toast';
 import { Modal } from '@/components/Modal';
 import { useLocale } from '@/contexts/LocaleContext';
-import { getApiErrorMessage } from '@/utils';
+import { getApiErrorMessage, cn } from '@/utils';
 
-export function MyAddressesPage() {
+export function MyAddressesPage({ embedded = false }: { embedded?: boolean }) {
     const { isAuthenticated } = useUserAuth();
     const queryClient = useQueryClient();
     const { toast } = useToast();
@@ -30,6 +30,9 @@ export function MyAddressesPage() {
         edit: 'تعديل',
         delete: 'حذف',
         country: 'الدولة',
+        setAsPrimary: 'تعيين كافتراضي',
+        setPrimarySuccess: 'تم تعيين العنوان كافتراضي',
+        setPrimaryFail: 'فشل تعيين العنوان كافتراضي',
     } : {
         title: 'My Addresses',
         subtitle: 'Manage your delivery locations and shipping preferences.',
@@ -47,6 +50,9 @@ export function MyAddressesPage() {
         edit: 'Edit',
         delete: 'Delete',
         country: 'Country',
+        setAsPrimary: 'Set as Primary',
+        setPrimarySuccess: 'Address set as primary',
+        setPrimaryFail: 'Failed to set primary address',
     };
     
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -81,24 +87,51 @@ export function MyAddressesPage() {
         setIsModalOpen(true);
     };
 
+    const setPrimaryMutation = useMutation({
+        mutationFn: (id: string) => addressesApi.update(id, { isPrimary: true } as Partial<CreateAddressBody>),
+        onSuccess: () => {
+            toast(copy.setPrimarySuccess, 'success');
+            queryClient.invalidateQueries({ queryKey: ['my-addresses'] });
+        },
+        onError: (err: unknown) => {
+            toast(getApiErrorMessage(err, copy.setPrimaryFail), 'error');
+        }
+    });
+
     if (!isAuthenticated) return null;
 
     return (
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8 animate-fade-in">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
-                        <MapPin className="w-6 h-6 text-brand-600" /> {copy.title}
-                    </h1>
-                    <p className="text-gray-500 mt-1">{copy.subtitle}</p>
+        <div className={cn(
+            "mx-auto px-4 sm:px-6 animate-fade-in",
+            embedded ? "w-full py-2" : "max-w-4xl py-10 space-y-8"
+        )}>
+            {!embedded && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
+                            <MapPin className="w-6 h-6 text-brand-600" /> {copy.title}
+                        </h1>
+                        <p className="text-gray-500 mt-1">{copy.subtitle}</p>
+                    </div>
+                    <button 
+                        onClick={handleAdd}
+                        className="btn-primary flex items-center gap-2 px-6 rounded-2xl shadow-lg shadow-brand-500/20"
+                    >
+                        <Plus size={18} /> {copy.addNew}
+                    </button>
                 </div>
-                <button 
-                    onClick={handleAdd}
-                    className="btn-primary flex items-center gap-2 px-6 rounded-2xl shadow-lg shadow-brand-500/20"
-                >
-                    <Plus size={18} /> {copy.addNew}
-                </button>
-            </div>
+            )}
+
+            {embedded && (
+                <div className="flex justify-end mb-4">
+                    <button 
+                        onClick={handleAdd}
+                        className="btn-primary flex items-center gap-2 px-4 py-2 rounded-xl text-sm shadow-sm"
+                    >
+                        <Plus size={16} /> {copy.addNew}
+                    </button>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {isLoading ? (
@@ -168,6 +201,16 @@ export function MyAddressesPage() {
                                         <span>{address.country}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
+                                        {!address.isPrimary && (
+                                            <button
+                                                onClick={() => setPrimaryMutation.mutate(address.id)}
+                                                disabled={setPrimaryMutation.isPending}
+                                                className="p-2 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-full transition-all"
+                                                title={copy.setAsPrimary}
+                                            >
+                                                <Star size={16} />
+                                            </button>
+                                        )}
                                         <button 
                                             onClick={() => handleEdit(address)}
                                             className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-full transition-all"

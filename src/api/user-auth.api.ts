@@ -8,7 +8,8 @@ export interface UserRegisterRequest {
 }
 
 export interface UserLoginRequest {
-    email: string;
+    email?: string;
+    mobilePhone?: string;
     password: string;
 }
 
@@ -68,4 +69,11 @@ export const userAuthApi = {
      */
     resetPassword: (token: string, body: { password: string }) =>
         userApi.patch<{ message: string }>(`/auth/reset-password/${token}`, body).then((r) => r.data),
+
+    /**
+     * PATCH /auth/update-my-info
+     * Accepts FormData with optional fields: name, email, mobilePhone, newPassword, currentPassword, profileImage
+     */
+    updateMyInfo: (data: FormData) =>
+        userApi.patch<{ message: string; user: UserData }>('/auth/update-my-info', data).then((r) => r.data),
 };

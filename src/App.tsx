@@ -23,6 +23,9 @@ const DashboardPage = lazy(() =>
 const UsersPage = lazy(() =>
   import('@/features/users/UsersPage').then((m) => ({ default: m.UsersPage })),
 );
+const AdminProfilePage = lazy(() =>
+  import('@/features/dashboard/AdminProfilePage').then((m) => ({ default: m.AdminProfilePage })),
+);
 const UserDetailsPage = lazy(() =>
   import('@/features/users/UserDetailsPage').then((m) => ({ default: m.UserDetailsPage })),
 );
@@ -109,6 +112,12 @@ const RegisterPage = lazy(() =>
 const VerifyEmailPage = lazy(() =>
   import('@/features/user-auth/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage })),
 );
+const VerifyEmailCodePage = lazy(() =>
+  import('@/features/user-auth/VerifyEmailCodePage').then((m) => ({ default: m.VerifyEmailCodePage })),
+);
+const ResetPasswordPage = lazy(() =>
+  import('@/features/user-auth/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })),
+);
 const CartPage = lazy(() =>
   import('@/features/cart/CartPage').then((m) => ({ default: m.CartPage })),
 );
@@ -126,6 +135,9 @@ const MyWalletPage = lazy(() =>
 );
 const MyAddressesPage = lazy(() =>
   import('@/features/account/MyAddressesPage').then((m) => ({ default: m.MyAddressesPage })),
+);
+const MyProfilePage = lazy(() =>
+  import('@/features/account/MyProfilePage').then((m) => ({ default: m.MyProfilePage })),
 );
 
 // ─── Query Client ─────────────────────────────────────────────────────────────
@@ -202,6 +214,7 @@ const router = createBrowserRouter([
       { path: 'analytics/user-reports', element: <UserReportsPage /> },
       { path: 'analytics/product-reports', element: <ProductReportsPage /> },
       { path: 'analytics/coupon-reports', element: <CouponReportsPage /> },
+      { path: 'profile', element: <Suspense fallback={<PageLoader />}><AdminProfilePage /></Suspense> },
     ],
   },
   // Public routes (wrapped by PublicLayout which provides UserAuthProvider + CartProvider)
@@ -212,7 +225,9 @@ const router = createBrowserRouter([
       { index: true, element: <Suspense fallback={<PageLoader />}><HomePage /></Suspense> },
       { path: 'login', element: <Suspense fallback={<PageLoader />}><LoginPage /></Suspense> },
       { path: 'register', element: <Suspense fallback={<PageLoader />}><RegisterPage /></Suspense> },
+      { path: 'reset-password/:token', element: <Suspense fallback={<PageLoader />}><ResetPasswordPage /></Suspense> },
       { path: 'verify-email', element: <Suspense fallback={<PageLoader />}><VerifyEmailPage /></Suspense> },
+      { path: 'verify-email/code', element: <Suspense fallback={<PageLoader />}><VerifyEmailCodePage /></Suspense> },
       { path: 'products', element: <Suspense fallback={<PageLoader />}><PublicProductsPage /></Suspense> },
       { path: 'products/:id', element: <Suspense fallback={<PageLoader />}><PublicProductDetailsPage /></Suspense> },
       { path: 'cart', element: <Suspense fallback={<PageLoader />}><CartPage /></Suspense> },
@@ -221,6 +236,7 @@ const router = createBrowserRouter([
       { path: 'account/orders/:id', element: <Suspense fallback={<PageLoader />}><MyOrderDetailsPage /></Suspense> },
       { path: 'account/wallet', element: <Suspense fallback={<PageLoader />}><MyWalletPage /></Suspense> },
       { path: 'account/addresses', element: <Suspense fallback={<PageLoader />}><MyAddressesPage /></Suspense> },
+      { path: 'account/profile', element: <Suspense fallback={<PageLoader />}><MyProfilePage /></Suspense> },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },

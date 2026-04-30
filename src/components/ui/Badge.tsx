@@ -54,13 +54,13 @@ export function PublishedBadge({ published }: { published: boolean }) {
 
 interface AvatarProps {
     name: string;
-    imageId?: string;
+    src?: string | null;
     size?: 'sm' | 'md' | 'lg';
 }
 
 const avatarSizes = { sm: 'w-7 h-7 text-xs', md: 'w-9 h-9 text-sm', lg: 'w-12 h-12 text-base' };
 
-export function Avatar({ name, size = 'md' }: AvatarProps) {
+export function Avatar({ name, src, size = 'md' }: AvatarProps) {
     const initials = name
         .split(' ')
         .slice(0, 2)
@@ -76,6 +76,16 @@ export function Avatar({ name, size = 'md' }: AvatarProps) {
         'bg-indigo-100 text-indigo-700',
     ];
     const color = colors[name.charCodeAt(0) % colors.length];
+
+    if (src) {
+        return (
+            <img 
+                src={src} 
+                alt={name} 
+                className={cn('rounded-full object-cover shrink-0', avatarSizes[size])} 
+            />
+        );
+    }
 
     return (
         <div
